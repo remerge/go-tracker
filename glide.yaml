@@ -1,0 +1,8 @@
+package: github.com/remerge/tracker
+import:
+- package: github.com/google/uuid
+- package: github.com/remerge/timestr
+- package: github.com/Shopify/sarama
+- package: github.com/beeker1121/goque
+testImport:
+- package: github.com/stretchr/testify
