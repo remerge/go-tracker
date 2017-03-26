@@ -3,7 +3,7 @@ package tracker
 import (
 	"testing"
 
-	"github.com/remerge/timestr"
+	"github.com/remerge/go-timestr"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
 )

@@ -3,7 +3,7 @@ package tracker
 import (
 	"encoding/json"
 
-	"github.com/remerge/timestr"
+	"github.com/remerge/go-timestr"
 )
 
 // Tracker implements a simple interface to track (unstructured) messages or

@@ -1,5 +1,5 @@
-hash: 97438af995f3698a8a8ef900bf1ec23a8b2aacc608ee21e1c634a5ec8849fda2
-updated: 2017-03-26T15:50:19.525711901Z
+hash: 216fd962217535898050d5fd5c53e6b24b0e874669e522137d20862bb75c6626
+updated: 2017-03-26T16:39:12.403027635Z
 imports:
 - name: github.com/beeker1121/goque
   version: e1e63ca63c14b41209e160f54c8e7669564eacc4
@@ -29,8 +29,8 @@ imports:
   - xxHash32
 - name: github.com/rcrowley/go-metrics
   version: 1f30fe9094a513ce4c700b9a54458bbb0c96996c
-- name: github.com/remerge/timestr
-  version: a9e8eb68b388192f4592d17619700e30379065c1
+- name: github.com/remerge/go-timestr
+  version: e6d2d225b9413f515880d73bfdfd5520b454371f
 - name: github.com/Shopify/sarama
   version: 3efb95dad8fbcd194d3c06f7b9c40eabeb719b36
 - name: github.com/syndtr/goleveldb
