@@ -1,4 +1,4 @@
-PROJECT := tracker
+PROJECT := go-tracker
 PACKAGE := github.com/remerge/$(PROJECT)
 
 # http://stackoverflow.com/questions/322936/common-gnu-makefile-directory-path#comment11704496_324782
@@ -31,7 +31,7 @@ clean:
 
 lint:
 	cd $(GOSRCDIR) && \
-		gometalinter --deadline=60s $(GOPATHS)
+		gometalinter --deadline=60s --enable-all --errors --tests -D gotype $(GOPATHS)
 
 test: lint
 	cd $(GOSRCDIR) && \

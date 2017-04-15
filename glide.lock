@@ -1,8 +1,8 @@
-hash: 216fd962217535898050d5fd5c53e6b24b0e874669e522137d20862bb75c6626
-updated: 2017-03-26T16:39:12.403027635Z
+hash: 3bc5f6c7ae2ea41c5c57c429d94be35bb6ca9e3466f1db0470015695e76b4b77
+updated: 2017-04-15T19:06:40.547168144Z
 imports:
 - name: github.com/beeker1121/goque
-  version: e1e63ca63c14b41209e160f54c8e7669564eacc4
+  version: 4044bc29b28064db4f08e947c4972d5ca3e0f3c8
 - name: github.com/davecgh/go-spew
   version: 04cdfd42973bb9c8589fd6a731800cf222fde1a9
   subpackages:
@@ -17,12 +17,10 @@ imports:
   version: 44cc805cf13205b55f69e14bcb69867d1ae92f98
 - name: github.com/golang/snappy
   version: 553a641470496b2327abcac10b36396bd98e45c9
-- name: github.com/google/uuid
-  version: 6a5e28554805e78ea6141142aba763936c4761c0
 - name: github.com/klauspost/crc32
   version: 1bab8b35b6bb565f92cbc97939610af9369f942a
 - name: github.com/pierrec/lz4
-  version: 90290f74b1b4d9c097f0a3b3c7eba2ef3875c699
+  version: f5b77fd73d83122495309c0f459b810f83cc291f
 - name: github.com/pierrec/xxHash
   version: 5a004441f897722c627870a981d02b29924215fa
   subpackages:
@@ -30,11 +28,15 @@ imports:
 - name: github.com/rcrowley/go-metrics
   version: 1f30fe9094a513ce4c700b9a54458bbb0c96996c
 - name: github.com/remerge/go-timestr
-  version: e6d2d225b9413f515880d73bfdfd5520b454371f
+  version: 854378a02e8fd5f4c1aa0eec1de0597ffddcf2fe
+- name: github.com/remerge/go-xorshift
+  version: c7e2786316c8b0c140cca990cc31ddfc7bd7ac6d
+  subpackages:
+  - uuid
 - name: github.com/Shopify/sarama
-  version: 3efb95dad8fbcd194d3c06f7b9c40eabeb719b36
+  version: d4ece5d05a86b2b64248f4943f872bea961ec835
 - name: github.com/syndtr/goleveldb
-  version: 23851d93a2292dcc56e71a18ec9e0624d84a0f65
+  version: 8c81ea47d4c41a385645e133e15510fc6a2a74b4
   subpackages:
   - leveldb
   - leveldb/cache

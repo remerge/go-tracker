@@ -25,7 +25,7 @@ type KafkaTracker struct {
 
 var _ Tracker = (*KafkaTracker)(nil)
 
-// NewKafkaTracker creates a new mock tracker for testing.
+// NewKafkaTracker creates a new tracker connected to a kafka cluster.
 func NewKafkaTracker(brokers []string, metadata *EventMetadata) (t *KafkaTracker, err error) {
 	t = &KafkaTracker{}
 	t.Metadata = metadata

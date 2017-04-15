@@ -1,6 +1,6 @@
 package tracker
 
-import "github.com/google/uuid"
+import "github.com/remerge/go-xorshift/uuid"
 
 // Event is a generic interface for accepting structured messages that have
 // metadata and can be serialized.
@@ -37,7 +37,7 @@ func (eb *EventBase) SetTimestamp(ts string) {
 // EventMetadata.
 func (eb *EventBase) SetMetadata(metadata *EventMetadata) {
 	if eb.UUID == "" {
-		eb.UUID = uuid.Must(uuid.NewUUID()).String()
+		eb.UUID = uuid.Must(uuid.NewRandom()).String()
 	}
 
 	if eb.Service == "" {
