@@ -39,9 +39,9 @@ run: build
 	./$(MAIN)
 
 clean:
-	go clean
+	cd $(GOSRCDIR) && \
+		go clean -i -x
 	rm -f $(MAIN)
-	rm -rf $(TOP)/vendor/
 
 lint: build
 	cd $(GOSRCDIR) && \
