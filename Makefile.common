@@ -45,7 +45,7 @@ clean:
 
 lint: build
 	cd $(GOSRCDIR) && \
-		gometalinter --deadline=60s --enable-all --tests $(GOMETALINTER_OPTS) $(GOPATHS)
+		gometalinter --deadline=60s --enable-all --tests --fast $(GOMETALINTER_OPTS) $(GOPATHS)
 
 test: lint
 	cd $(GOSRCDIR) && \
