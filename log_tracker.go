@@ -24,21 +24,19 @@ func (t *LogTracker) Close() {
 
 // FastMessage sends a message without waiting for confirmation.
 func (t *LogTracker) FastMessage(topic string, message interface{}) error {
-	buf, err := t.Encode(message)
-	if err != nil {
-		return err
-	}
-
-	t.logger.WithFields(cue.Fields{
-		"topic":   topic,
-		"message": string(buf),
-	}).Info("fast message")
-
-	return nil
+	return t.logMessage("fast", topic, message)
 }
 
 // SafeMessage sends a message and waits for confirmation.
 func (t *LogTracker) SafeMessage(topic string, message interface{}) error {
+	return t.logMessage("safe", topic, message)
+}
+
+func (t *LogTracker) logMessage(
+	typ string,
+	topic string,
+	message interface{},
+) error {
 	buf, err := t.Encode(message)
 	if err != nil {
 		return err
@@ -47,7 +45,7 @@ func (t *LogTracker) SafeMessage(topic string, message interface{}) error {
 	t.logger.WithFields(cue.Fields{
 		"topic":   topic,
 		"message": string(buf),
-	}).Info("safe message")
+	}).Info(typ + " message")
 
 	return nil
 }

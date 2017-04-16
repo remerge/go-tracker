@@ -8,7 +8,7 @@ import (
 	"github.com/remerge/go-tracker"
 )
 
-type TestEvent struct {
+type testEvent struct {
 	tracker.EventBase
 	MyField string
 }
@@ -26,7 +26,7 @@ func main() {
 		Release:     "master",
 	}
 
-	event := &TestEvent{
+	event := &testEvent{
 		MyField: "foo",
 	}
 
@@ -35,8 +35,11 @@ func main() {
 		log.Panic(err, "failed to create kafka tracker")
 	}
 
-	kt.FastMessage("test", event)
-	kt.SafeMessage("test", event)
+	// #nosec
+	_ = log.Error(kt.FastMessage("test", event), "failed to send fast message")
+
+	// #nosec
+	_ = log.Error(kt.SafeMessage("test", event), "failed to send safe message")
 
 	// give background worker a chance to send safe messages
 	time.Sleep(1 * time.Second)

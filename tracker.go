@@ -22,6 +22,8 @@ type BaseTracker struct {
 	Metadata *EventMetadata
 }
 
+// Encode a message into bytes using `json.Marshal` after updating metadata
+// fields.
 func (t *BaseTracker) Encode(message interface{}) ([]byte, error) {
 	switch message.(type) {
 	case []byte:

@@ -27,7 +27,10 @@ type KafkaTracker struct {
 var _ Tracker = (*KafkaTracker)(nil)
 
 // NewKafkaTracker creates a new tracker connected to a kafka cluster.
-func NewKafkaTracker(brokers []string, metadata *EventMetadata) (t *KafkaTracker, err error) {
+func NewKafkaTracker(
+	brokers []string,
+	metadata *EventMetadata,
+) (t *KafkaTracker, err error) {
 	log.WithValue("brokers", brokers).Info("starting tracker")
 
 	t = &KafkaTracker{}
@@ -71,14 +74,14 @@ func NewKafkaTracker(brokers []string, metadata *EventMetadata) (t *KafkaTracker
 
 	t.kafka.safe, err = sarama.NewSyncProducer(brokers, config)
 	if err != nil {
-		t.kafka.fast.Close()
+		_ = log.Error(t.kafka.fast.Close(), "failed to close fast producer")
 		return nil, err
 	}
 
 	t.queue, err = goque.OpenQueue("cache/" + config.ClientID)
 	if err != nil {
-		t.kafka.fast.Close()
-		t.kafka.safe.Close()
+		_ = log.Error(t.kafka.fast.Close(), "failed to close fast producer")
+		_ = log.Error(t.kafka.safe.Close(), "failed to close safe producer")
 		return nil, err
 	}
 
@@ -99,15 +102,15 @@ func (t *KafkaTracker) Close() {
 
 	// shutdown safe producer
 	log.Info("closing safe producer")
-	t.kafka.safe.Close()
+	_ = log.Error(t.kafka.safe.Close(), "failed to close safe producer")
 
 	// shutdwn fast producer
 	log.Info("closing fast producer")
-	t.kafka.fast.Close()
+	_ = log.Error(t.kafka.fast.Close(), "failed to close fast producer")
 
 	// close access to disk queue
 	log.Info("closing disk queue")
-	t.queue.Close()
+	_ = log.Error(t.queue.Close(), "failed to close disk queue")
 }
 
 // FastMessage sends a message without waiting for confirmation.
@@ -184,8 +187,9 @@ func (t *KafkaTracker) start() {
 			} else if err != nil {
 				log.Panic(err, "unknown queue error")
 			} else if err = t.processSafeMessage(item.Value); err != nil {
-				log.Error(err, "failed to process safe message")
-				t.queue.Enqueue(item.Value)
+				_ = log.Error(err, "failed to process safe message")
+				_, err = t.queue.Enqueue(item.Value)
+				_ = log.Error(err, "failed to enqueue safe message")
 			}
 		case <-t.quit:
 			close(t.done)
