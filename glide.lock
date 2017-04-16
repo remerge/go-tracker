@@ -1,8 +1,13 @@
-hash: 3bc5f6c7ae2ea41c5c57c429d94be35bb6ca9e3466f1db0470015695e76b4b77
-updated: 2017-04-15T19:06:40.547168144Z
+hash: 33b7fab9b635286ae9fb78eb7653f70bfdc6a163a6e55b7152fc8e557f42d867
+updated: 2017-04-16T16:11:09.97983956Z
 imports:
 - name: github.com/beeker1121/goque
   version: 4044bc29b28064db4f08e947c4972d5ca3e0f3c8
+- name: github.com/bobziuchkovski/cue
+  version: 852726be06b5c373580e50301c29f53f642f65ec
+  subpackages:
+  - collector
+  - format
 - name: github.com/davecgh/go-spew
   version: 04cdfd42973bb9c8589fd6a731800cf222fde1a9
   subpackages:

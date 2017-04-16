@@ -3,8 +3,11 @@ package tracker
 import (
 	"encoding/json"
 
+	"github.com/bobziuchkovski/cue"
 	"github.com/remerge/go-timestr"
 )
+
+var log = cue.NewLogger("tracker")
 
 // Tracker implements a simple interface to track (unstructured) messages or
 // (structured) events.

@@ -1,14 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"os"
 	"time"
 
-	timestr "github.com/remerge/go-timestr"
+	"github.com/bobziuchkovski/cue"
+	"github.com/bobziuchkovski/cue/collector"
 	"github.com/remerge/go-tracker"
-	rand "github.com/remerge/go-xorshift"
 )
 
 type TestEvent struct {
@@ -16,8 +13,10 @@ type TestEvent struct {
 	MyField string
 }
 
+var log = cue.NewLogger("main")
+
 func main() {
-	fmt.Println(rand.Int63())
+	cue.Collect(cue.DEBUG, collector.Terminal{}.New())
 
 	metadata := &tracker.EventMetadata{
 		Service:     "tracker",
@@ -28,21 +27,19 @@ func main() {
 	}
 
 	event := &TestEvent{
-		MyField: timestr.ISO8601(),
+		MyField: "foo",
 	}
-
-	logger := log.New(os.Stdout, "[sarama] ", log.LstdFlags)
-	lt := tracker.NewLogTracker(logger, metadata)
-	lt.FastMessage("test", event)
 
 	kt, err := tracker.NewKafkaTracker([]string{"0.0.0.0:9092"}, metadata)
 	if err != nil {
-		panic(err)
+		log.Panic(err, "failed to create kafka tracker")
 	}
 
 	kt.FastMessage("test", event)
 	kt.SafeMessage("test", event)
 
+	// give background worker a chance to send safe messages
 	time.Sleep(1 * time.Second)
+
 	kt.Close()
 }

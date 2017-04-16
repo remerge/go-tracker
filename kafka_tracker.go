@@ -7,6 +7,7 @@ import (
 
 	"github.com/Shopify/sarama"
 	"github.com/beeker1121/goque"
+	"github.com/bobziuchkovski/cue"
 )
 
 // KafkaTracker is a tracker that sends messages to Apache Kafka.
@@ -27,6 +28,8 @@ var _ Tracker = (*KafkaTracker)(nil)
 
 // NewKafkaTracker creates a new tracker connected to a kafka cluster.
 func NewKafkaTracker(brokers []string, metadata *EventMetadata) (t *KafkaTracker, err error) {
+	log.WithValue("brokers", brokers).Info("starting tracker")
+
 	t = &KafkaTracker{}
 	t.Metadata = metadata
 
@@ -90,16 +93,20 @@ func NewKafkaTracker(brokers []string, metadata *EventMetadata) (t *KafkaTracker
 // Close the tracker.
 func (t *KafkaTracker) Close() {
 	// shutdown background worker
+	log.Info("closing tracker")
 	close(t.quit)
 	<-t.done
 
 	// shutdown safe producer
+	log.Info("closing safe producer")
 	t.kafka.safe.Close()
 
 	// shutdwn fast producer
+	log.Info("closing fast producer")
 	t.kafka.fast.Close()
 
 	// close access to disk queue
+	log.Info("closing disk queue")
 	t.queue.Close()
 }
 
@@ -109,6 +116,11 @@ func (t *KafkaTracker) FastMessage(topic string, message interface{}) error {
 	if err != nil {
 		return err
 	}
+
+	log.WithFields(cue.Fields{
+		"topic":   topic,
+		"message": string(buf),
+	}).Debug("sending fast message")
 
 	t.kafka.fast.Input() <- &sarama.ProducerMessage{
 		Topic: topic,
@@ -133,6 +145,11 @@ func (t *KafkaTracker) SafeMessage(topic string, message interface{}) error {
 var safeQueueDelim = []byte{0x0}
 
 func (t *KafkaTracker) enqueue(topic string, value []byte) error {
+	log.WithFields(cue.Fields{
+		"topic":   topic,
+		"message": string(value),
+	}).Debug("enqueue safe message")
+
 	msg := append([]byte(topic), safeQueueDelim...)
 	msg = append(msg, value...)
 	_, err := t.queue.Enqueue(msg)
@@ -143,6 +160,11 @@ func (t *KafkaTracker) processSafeMessage(msg []byte) error {
 	idx := bytes.Index(msg, safeQueueDelim)
 	topic := string(msg[0:idx])
 	value := msg[idx+1:]
+
+	log.WithFields(cue.Fields{
+		"topic":   topic,
+		"message": string(value),
+	}).Debug("sending safe message")
 
 	_, _, err := t.kafka.safe.SendMessage(&sarama.ProducerMessage{
 		Topic: topic,
@@ -160,9 +182,9 @@ func (t *KafkaTracker) start() {
 			if err == goque.ErrEmpty {
 				time.Sleep(100 * time.Millisecond)
 			} else if err != nil {
-				panic(err)
+				log.Panic(err, "unknown queue error")
 			} else if err = t.processSafeMessage(item.Value); err != nil {
-				sarama.Logger.Printf("failed to send safe message: %s\n", err.Error())
+				log.Error(err, "failed to process safe message")
 				t.queue.Enqueue(item.Value)
 			}
 		case <-t.quit:

@@ -1,20 +1,20 @@
 package tracker
 
-import "log"
+import "github.com/bobziuchkovski/cue"
 
 // LogTracker is a tracker with in-memory storage used for testing.
 type LogTracker struct {
 	BaseTracker
-	logger *log.Logger
+	logger cue.Logger
 }
 
 var _ Tracker = (*LogTracker)(nil)
 
 // NewLogTracker creates a new mock tracker for testing.
-func NewLogTracker(logger *log.Logger, metadata *EventMetadata) *LogTracker {
+func NewLogTracker(name string, metadata *EventMetadata) *LogTracker {
 	t := &LogTracker{}
 	t.Metadata = metadata
-	t.logger = logger
+	t.logger = cue.NewLogger(name)
 	return t
 }
 
@@ -28,7 +28,12 @@ func (t *LogTracker) FastMessage(topic string, message interface{}) error {
 	if err != nil {
 		return err
 	}
-	t.logger.Printf("FastMessage(%s, %s)", topic, string(buf))
+
+	t.logger.WithFields(cue.Fields{
+		"topic":   topic,
+		"message": string(buf),
+	}).Info("fast message")
+
 	return nil
 }
 
@@ -38,6 +43,11 @@ func (t *LogTracker) SafeMessage(topic string, message interface{}) error {
 	if err != nil {
 		return err
 	}
-	t.logger.Printf("SafeMessage(%s, %s)", topic, string(buf))
+
+	t.logger.WithFields(cue.Fields{
+		"topic":   topic,
+		"message": string(buf),
+	}).Info("safe message")
+
 	return nil
 }
