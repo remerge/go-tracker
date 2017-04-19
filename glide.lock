@@ -1,8 +1,6 @@
-hash: 33b7fab9b635286ae9fb78eb7653f70bfdc6a163a6e55b7152fc8e557f42d867
-updated: 2017-04-16T16:11:09.97983956Z
+hash: 8e49d6064880d7d239d99e241b0bfe73051efb156984c635bbbb2435647d0537
+updated: 2017-04-19T08:29:33.518731064Z
 imports:
-- name: github.com/beeker1121/goque
-  version: 4044bc29b28064db4f08e947c4972d5ca3e0f3c8
 - name: github.com/bobziuchkovski/cue
   version: 852726be06b5c373580e50301c29f53f642f65ec
   subpackages:
@@ -40,21 +38,6 @@ imports:
   - uuid
 - name: github.com/Shopify/sarama
   version: d4ece5d05a86b2b64248f4943f872bea961ec835
-- name: github.com/syndtr/goleveldb
-  version: 8c81ea47d4c41a385645e133e15510fc6a2a74b4
-  subpackages:
-  - leveldb
-  - leveldb/cache
-  - leveldb/comparer
-  - leveldb/errors
-  - leveldb/filter
-  - leveldb/iterator
-  - leveldb/journal
-  - leveldb/memdb
-  - leveldb/opt
-  - leveldb/storage
-  - leveldb/table
-  - leveldb/util
 testImports:
 - name: github.com/pmezard/go-difflib
   version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
