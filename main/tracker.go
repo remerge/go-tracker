@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	"github.com/bobziuchkovski/cue"
 	"github.com/bobziuchkovski/cue/collector"
 	"github.com/remerge/go-tracker"
@@ -40,9 +38,6 @@ func main() {
 
 	// #nosec
 	_ = log.Error(kt.SafeMessage("test", event), "failed to send safe message")
-
-	// give background worker a chance to send safe messages
-	time.Sleep(1 * time.Second)
 
 	kt.Close()
 }
