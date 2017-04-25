@@ -4,11 +4,19 @@ TOP := $(dir $(CURDIR)/$(word $(words $(MAKEFILE_LIST)),$(MAKEFILE_LIST)))
 GOFMT=gofmt -w -s
 
 GOSRCDIR=$(GOPATH)/src/$(PACKAGE)
-GOPATHS=$(shell glide novendor)
+GOPATHS=$(shell glide novendor | grep -v /main/)
 GOFILES=$(shell git ls-files | grep '\.go$$')
 
 MAINGO=$(wildcard main/*.go)
 MAIN=$(patsubst main/%.go,%,$(MAINGO))
+
+ifeq ($(GOTEST_TIMEOUT),)
+	GOTEST_TIMEOUT=60s
+endif
+
+ifeq ($(GOMETALINTER_OPTS),)
+	GOMETALINTER_OPTS=--enable-all --tests --fast
+endif
 
 CODE_VERSION=$(TRAVIS_COMMIT)
 ifeq ($(CODE_VERSION),)
@@ -20,10 +28,10 @@ ifeq ($(CODE_BUILD),\#)
 	CODE_BUILD=$(PACKAGE)\#$(shell whoami)
 endif
 
-LDIMPORT=$(PACKAGE)/vendor/github.com/remerge/rex
+LDIMPORT=$(PACKAGE)/vendor/github.com/remerge/go-service
 LDFLAGS=-X $(LDIMPORT).CodeVersion=$(CODE_VERSION) -X $(LDIMPORT).CodeBuild=$(CODE_BUILD)@$(shell date -u +%FT%TZ)
 
-.PHONY: build clean lint test bench fmt dep init up gen
+.PHONY: build run clean lint test bench fmt dep init up gen release deploy
 
 all: build
 
@@ -31,6 +39,9 @@ build: fmt
 	cd $(GOSRCDIR) && \
 		CGO_ENABLED=0 \
 		go test -v -i
+	cd $(GOSRCDIR) && \
+		CGO_ENABLED=0 \
+		go build -v -i -ldflags "$(LDFLAGS)" $(GOPATHS)
 	cd $(GOSRCDIR) && \
 		CGO_ENABLED=0 \
 		go build -v -i -ldflags "$(LDFLAGS)" $(MAINGO)
@@ -45,11 +56,11 @@ clean:
 
 lint: build
 	cd $(GOSRCDIR) && \
-		gometalinter --deadline=60s --enable-all --tests --fast $(GOMETALINTER_OPTS) $(GOPATHS)
+		gometalinter --deadline=$(GOTEST_TIMEOUT) $(GOMETALINTER_OPTS) $(GOPATHS)
 
 test: lint
 	cd $(GOSRCDIR) && \
-		go test -timeout 60s -v $(GOPATHS)
+		go test -timeout $(GOTEST_TIMEOUT) -v $(GOPATHS)
 
 bench: build
 	cd $(GOSRCDIR) && \
@@ -76,3 +87,10 @@ gen:
 	cd $(GOSRCDIR) && \
 		go generate $(GOPATHS)
 	$(GOFMT) $(GOFILES)
+
+release:
+	git push origin master master:production
+
+deploy:
+	/bin/bash -c 'cd ../chef.new && knife ssh roles:$(PROJECT) sudo chef-client'
+	/bin/bash -c 'cd ../chef && knife sudo -Q roles:$(PROJECT) chef-client'

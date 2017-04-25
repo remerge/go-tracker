@@ -1,5 +1,5 @@
 hash: 8e49d6064880d7d239d99e241b0bfe73051efb156984c635bbbb2435647d0537
-updated: 2017-04-19T08:29:33.518731064Z
+updated: 2017-04-25T10:15:36.501891035Z
 imports:
 - name: github.com/bobziuchkovski/cue
   version: 852726be06b5c373580e50301c29f53f642f65ec
@@ -31,9 +31,9 @@ imports:
 - name: github.com/rcrowley/go-metrics
   version: 1f30fe9094a513ce4c700b9a54458bbb0c96996c
 - name: github.com/remerge/go-timestr
-  version: 854378a02e8fd5f4c1aa0eec1de0597ffddcf2fe
+  version: ff3620671690ff5f8e5f365e3a99190b2394ed85
 - name: github.com/remerge/go-xorshift
-  version: c7e2786316c8b0c140cca990cc31ddfc7bd7ac6d
+  version: d47546b42ea9c5e7794a31b3fac844a12f45e390
   subpackages:
   - uuid
 - name: github.com/Shopify/sarama
