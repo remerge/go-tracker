@@ -28,6 +28,8 @@ func (t *BaseTracker) Encode(message interface{}) ([]byte, error) {
 	switch message.(type) {
 	case []byte:
 		return message.([]byte), nil
+	case string:
+		return []byte(message.(string)), nil
 	case Event:
 		event := message.(Event)
 		event.SetMetadata(t.Metadata)
