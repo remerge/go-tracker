@@ -15,7 +15,7 @@ ifeq ($(GOTEST_TIMEOUT),)
 endif
 
 ifeq ($(GOMETALINTER_OPTS),)
-	GOMETALINTER_OPTS=--enable-all --tests --fast
+	GOMETALINTER_OPTS=--enable-all --tests
 endif
 
 CODE_VERSION=$(TRAVIS_COMMIT)
@@ -31,7 +31,7 @@ endif
 LDIMPORT=$(PACKAGE)/vendor/github.com/remerge/go-service
 LDFLAGS=-X $(LDIMPORT).CodeVersion=$(CODE_VERSION) -X $(LDIMPORT).CodeBuild=$(CODE_BUILD)@$(shell date -u +%FT%TZ)
 
-.PHONY: build run clean lint test bench fmt dep init up gen release deploy
+.PHONY: build run clean lint test bench fmt dep init up gen proto-dep proto release deploy
 
 all: build
 
@@ -87,6 +87,17 @@ gen:
 	cd $(GOSRCDIR) && \
 		go generate $(GOPATHS)
 	$(GOFMT) $(GOFILES)
+
+PROTOS=$(wildcard *.proto */*.proto)
+PBGOS=$(patsubst %.proto,%.pb.go,$(PROTOS))
+
+proto-dep:
+	go get -u github.com/gogo/protobuf/protoc-gen-gogofaster
+
+proto: proto-dep $(PBGOS)
+
+$(PBGOS): %.pb.go: %.proto
+	protoc --gogofaster_out=. -I=.:$(TOP)/vendor:$(GOPATH)/src $<
 
 release:
 	git push origin master master:production
