@@ -3,7 +3,7 @@ package tracker
 import (
 	"encoding/json"
 
-	"github.com/bobziuchkovski/cue"
+	"github.com/remerge/cue"
 	"github.com/remerge/go-timestr"
 )
 

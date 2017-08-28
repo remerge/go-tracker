@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Shopify/sarama"
-	"github.com/bobziuchkovski/cue"
+	"github.com/remerge/cue"
 )
 
 // KafkaTracker is a tracker that sends messages to Apache Kafka.

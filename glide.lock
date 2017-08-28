@@ -1,13 +1,8 @@
-hash: 8e49d6064880d7d239d99e241b0bfe73051efb156984c635bbbb2435647d0537
-updated: 2017-06-29T18:18:48.817766411Z
+hash: 38afe625439979c9bb68063a9fc4cee531fb29527f237ea69989dc3224a01e4e
+updated: 2017-08-28T21:31:41.124836281+02:00
 imports:
-- name: github.com/bobziuchkovski/cue
-  version: 852726be06b5c373580e50301c29f53f642f65ec
-  subpackages:
-  - collector
-  - format
 - name: github.com/davecgh/go-spew
-  version: 04cdfd42973bb9c8589fd6a731800cf222fde1a9
+  version: adab96458c51a58dc1783b3335dcce5461522e75
   subpackages:
   - spew
 - name: github.com/eapache/go-resiliency
@@ -21,28 +16,34 @@ imports:
 - name: github.com/golang/snappy
   version: 553a641470496b2327abcac10b36396bd98e45c9
 - name: github.com/pierrec/lz4
-  version: 5a3d2245f97fc249850e7802e3c01fad02a1c316
+  version: 08c27939df1bd95e881e2c2367a749964ad1fceb
 - name: github.com/pierrec/xxHash
-  version: 5a004441f897722c627870a981d02b29924215fa
+  version: a0006b13c722f7f12368c00a3d3c2ae8a999a0c6
   subpackages:
   - xxHash32
 - name: github.com/rcrowley/go-metrics
   version: 1f30fe9094a513ce4c700b9a54458bbb0c96996c
+- name: github.com/remerge/cue
+  version: 69c896c02169b211510320825b6ef71ab62e579f
+  subpackages:
+  - collector
+  - format
 - name: github.com/remerge/go-timestr
-  version: ff3620671690ff5f8e5f365e3a99190b2394ed85
+  version: a31c75d30272d252d3fe597d5be055553ebf43b8
 - name: github.com/remerge/go-xorshift
-  version: d47546b42ea9c5e7794a31b3fac844a12f45e390
+  version: d6a5f4fd89a9c0f6352888f3c7d40eceac1e26d3
   subpackages:
   - uuid
 - name: github.com/Shopify/sarama
-  version: f7e3024a61603647461f4b40bd8f3db88871bf9d
+  version: 4fceb07110ff2dd7b16a5cf4f45041dbd0bda97f
+  repo: https://github.com/remerge/sarama
 testImports:
 - name: github.com/pmezard/go-difflib
   version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: f6abca593680b2315d2075e0f5e2a9751e3f431a
+  version: 890a5c3458b43e6104ff5da8dfa139d013d77544
   subpackages:
   - assert
   - require

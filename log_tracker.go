@@ -1,6 +1,6 @@
 package tracker
 
-import "github.com/bobziuchkovski/cue"
+import "github.com/remerge/cue"
 
 // LogTracker is a tracker with in-memory storage used for testing.
 type LogTracker struct {

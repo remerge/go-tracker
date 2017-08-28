@@ -2,7 +2,8 @@ package: github.com/remerge/go-tracker
 import:
 - package: github.com/remerge/go-timestr
 - package: github.com/Shopify/sarama
+  repo: https://github.com/remerge/sarama
 - package: github.com/remerge/go-xorshift
-- package: github.com/bobziuchkovski/cue
+- package: github.com/remerge/cue
 testImport:
 - package: github.com/stretchr/testify
