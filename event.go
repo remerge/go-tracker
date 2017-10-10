@@ -1,7 +1,5 @@
 package tracker
 
-import "github.com/remerge/go-xorshift/uuid"
-
 // Event is a generic interface for accepting structured messages that have
 // metadata and can be serialized.
 type Event interface {
@@ -21,8 +19,7 @@ type EventMetadata struct {
 
 // EventBase can be used to implement the Event interface.
 type EventBase struct {
-	Ts   string `form:"ts" json:"ts,omitempty"`
-	UUID string `json:"_uuid,omitempty"`
+	Ts string `form:"ts" json:"ts,omitempty"`
 	EventMetadata
 }
 
@@ -36,10 +33,6 @@ func (eb *EventBase) SetTimestamp(ts string) {
 // SetMetadata sets all empty fields in EventBase to values supplied by
 // EventMetadata.
 func (eb *EventBase) SetMetadata(metadata *EventMetadata) {
-	if eb.UUID == "" {
-		eb.UUID = uuid.Must(uuid.NewRandom()).String()
-	}
-
 	if eb.Service == "" {
 		eb.Service = metadata.Service
 	}

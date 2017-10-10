@@ -1,8 +1,8 @@
 hash: 38afe625439979c9bb68063a9fc4cee531fb29527f237ea69989dc3224a01e4e
-updated: 2017-08-28T21:31:41.124836281+02:00
+updated: 2017-10-10T12:06:00.825612784Z
 imports:
 - name: github.com/davecgh/go-spew
-  version: adab96458c51a58dc1783b3335dcce5461522e75
+  version: 04cdfd42973bb9c8589fd6a731800cf222fde1a9
   subpackages:
   - spew
 - name: github.com/eapache/go-resiliency
@@ -32,10 +32,8 @@ imports:
   version: a31c75d30272d252d3fe597d5be055553ebf43b8
 - name: github.com/remerge/go-xorshift
   version: d6a5f4fd89a9c0f6352888f3c7d40eceac1e26d3
-  subpackages:
-  - uuid
 - name: github.com/Shopify/sarama
-  version: 4fceb07110ff2dd7b16a5cf4f45041dbd0bda97f
+  version: 919e11f89aedafea2adbc6c2d616760efb916872
   repo: https://github.com/remerge/sarama
 testImports:
 - name: github.com/pmezard/go-difflib

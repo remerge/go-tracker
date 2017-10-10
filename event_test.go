@@ -33,7 +33,6 @@ func (suite *EventTestSuite) TestEventMetadata() {
 	e.SetMetadata(m)
 
 	eb := e.(*EventBase)
-	assert.NotEmpty(suite.T(), eb.UUID)
 	assert.Equal(suite.T(), eb.Service, "test")
 	assert.Equal(suite.T(), eb.Environment, "testing")
 	assert.Equal(suite.T(), eb.Cluster, "t1")
