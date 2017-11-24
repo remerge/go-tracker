@@ -25,21 +25,21 @@ type BaseTracker struct {
 // Encode a message into bytes using `json.Marshal` after updating metadata
 // fields.
 func (t *BaseTracker) Encode(message interface{}) ([]byte, error) {
-	switch message.(type) {
+	switch m := message.(type) {
 	case []byte:
-		return message.([]byte), nil
+		return m, nil
 	case string:
-		return []byte(message.(string)), nil
+		return []byte(m), nil
 	case Event:
-		event := message.(Event)
-		event.SetMetadata(t.Metadata)
-		event.SetTimestamp(timestr.ISO8601())
-		return json.Marshal(event)
+		m.SetMetadata(t.Metadata)
+		m.SetTimestamp(timestr.ISO8601())
+		return json.Marshal(m)
 	case map[string]interface{}:
-		event := message.(map[string]interface{})
-		event["ts"] = timestr.ISO8601()
-		return json.Marshal(event)
+		if _, found := m["ts"]; !found {
+			m["ts"] = timestr.ISO8601()
+		}
+		return json.Marshal(m)
 	default:
-		return json.Marshal(message)
+		return json.Marshal(m)
 	}
 }
