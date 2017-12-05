@@ -1,8 +1,8 @@
 hash: 38afe625439979c9bb68063a9fc4cee531fb29527f237ea69989dc3224a01e4e
-updated: 2017-10-10T12:06:00.825612784Z
+updated: 2017-12-05T12:39:50.950556971+01:00
 imports:
 - name: github.com/davecgh/go-spew
-  version: 04cdfd42973bb9c8589fd6a731800cf222fde1a9
+  version: ecdeabc65495df2dec95d7c4a4c3e021903035e5
   subpackages:
   - spew
 - name: github.com/eapache/go-resiliency
@@ -22,16 +22,16 @@ imports:
   subpackages:
   - xxHash32
 - name: github.com/rcrowley/go-metrics
-  version: 1f30fe9094a513ce4c700b9a54458bbb0c96996c
+  version: e181e095bae94582363434144c61a9653aff6e50
 - name: github.com/remerge/cue
-  version: 69c896c02169b211510320825b6ef71ab62e579f
+  version: 2bf0689b2311d580f8c7182df1161899bbfc853f
   subpackages:
   - collector
   - format
 - name: github.com/remerge/go-timestr
   version: a31c75d30272d252d3fe597d5be055553ebf43b8
 - name: github.com/remerge/go-xorshift
-  version: d6a5f4fd89a9c0f6352888f3c7d40eceac1e26d3
+  version: 311573fe0a94af7b7597258aaf1fc2fbee2db0d4
 - name: github.com/Shopify/sarama
   version: 919e11f89aedafea2adbc6c2d616760efb916872
   repo: https://github.com/remerge/sarama
@@ -41,7 +41,7 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 890a5c3458b43e6104ff5da8dfa139d013d77544
+  version: 2aa2c176b9dab406a6970f6a55f513e8a8c8b18f
   subpackages:
   - assert
   - require
