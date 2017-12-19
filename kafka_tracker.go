@@ -4,12 +4,18 @@ import (
 	"fmt"
 
 	"github.com/Shopify/sarama"
+	"github.com/rcrowley/go-metrics"
 	"github.com/remerge/cue"
 )
 
 // KafkaTracker is a tracker that sends messages to Apache Kafka.
 type KafkaTracker struct {
 	BaseTracker
+	metrics struct {
+		// TODO (Aleksandr Dorofeev): Provide registry to Sarama
+		fastErrorRate metrics.Meter
+		safeErrorRate metrics.Meter
+	}
 	kafka struct {
 		fast sarama.AsyncProducer
 		safe sarama.SyncProducer
@@ -39,15 +45,27 @@ func NewKafkaTracker(
 	)
 
 	config.Producer.Return.Successes = false
-	config.Producer.Return.Errors = false
+	config.Producer.Return.Errors = true
 	config.Producer.RequiredAcks = sarama.NoResponse
 	config.Producer.Compression = sarama.CompressionSnappy
 	config.ChannelBufferSize = 131072
+
+	t.metrics.fastErrorRate = metrics.GetOrRegisterMeter(
+		"tracker,service="+",type=fast send_error_rate",
+		nil)
 
 	t.kafka.fast, err = sarama.NewAsyncProducer(brokers, config)
 	if err != nil {
 		return nil, err
 	}
+	go func() {
+		for fastErr := range t.kafka.fast.Errors() {
+			t.metrics.fastErrorRate.Mark(1)
+			_ = log.WithFields(cue.Fields{
+				"topic": fastErr.Msg.Topic,
+			}).Errorf(fastErr.Err, "fast message failed: %v", fastErr.Err)
+		}
+	}()
 
 	// safe producer
 	config = sarama.NewConfig()
@@ -69,6 +87,9 @@ func NewKafkaTracker(
 		_ = log.Error(t.kafka.fast.Close(), "failed to close fast producer")
 		return nil, err
 	}
+	t.metrics.safeErrorRate = metrics.GetOrRegisterMeter(
+		"tracker,service="+",type=safe send_error_rate",
+		nil)
 
 	return t, nil
 }
@@ -120,6 +141,9 @@ func (t *KafkaTracker) SafeMessage(topic string, message interface{}) error {
 		Topic: topic,
 		Value: sarama.ByteEncoder(buf),
 	})
+	if err != nil {
+		t.metrics.safeErrorRate.Mark(1)
+	}
 
 	return err
 }
