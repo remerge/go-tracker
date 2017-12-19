@@ -63,7 +63,7 @@ func NewKafkaTracker(
 			t.metrics.fastErrorRate.Mark(1)
 			_ = log.WithFields(cue.Fields{
 				"topic": fastErr.Msg.Topic,
-			}).Errorf(fastErr.Err, "fast message failed: %v", fastErr.Err)
+			}).Error(fastErr.Err, "send fast message failed")
 		}
 	}()
 
