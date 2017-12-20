@@ -12,6 +12,7 @@ import (
 type KafkaTracker struct {
 	BaseTracker
 	metrics struct {
+		registry metrics.Registry
 		fastErrorRate metrics.Meter
 		safeErrorRate metrics.Meter
 	}
@@ -33,6 +34,9 @@ func NewKafkaTracker(
 	t = &KafkaTracker{}
 	t.Metadata = metadata
 
+	// TODO (Aleksandr Dorofeev): Add metrics registry to arguments
+	t.metrics.registry = metrics.DefaultRegistry
+
 	// fast producer
 	config := sarama.NewConfig()
 	config.ClientID = fmt.Sprintf(
@@ -48,7 +52,8 @@ func NewKafkaTracker(
 	config.Producer.RequiredAcks = sarama.NoResponse
 	config.Producer.Compression = sarama.CompressionSnappy
 	config.ChannelBufferSize = 131072
-
+	config.MetricRegistry = metrics.NewPrefixedChildRegistry(
+		t.metrics.registry, "tracker,type=fast kafka_")
 	t.metrics.fastErrorRate = metrics.GetOrRegisterMeter(
 		"tracker,type=fast kafka_produce_error_rate",
 		nil)
@@ -80,6 +85,8 @@ func NewKafkaTracker(
 	config.Producer.Return.Errors = true
 	config.Producer.RequiredAcks = sarama.WaitForLocal
 	config.Producer.Compression = sarama.CompressionSnappy
+	config.MetricRegistry = metrics.NewPrefixedChildRegistry(
+		t.metrics.registry, "tracker,type=safe kafka_")
 
 	t.kafka.safe, err = sarama.NewSyncProducer(brokers, config)
 	if err != nil {
