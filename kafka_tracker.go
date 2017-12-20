@@ -51,7 +51,7 @@ func NewKafkaTracker(
 	config.ChannelBufferSize = 131072
 
 	t.metrics.fastErrorRate = metrics.GetOrRegisterMeter(
-		"tracker,type=fast send_error_rate",
+		"tracker,type=fast kafka_send_error_rate",
 		nil)
 
 	t.kafka.fast, err = sarama.NewAsyncProducer(brokers, config)
@@ -88,7 +88,7 @@ func NewKafkaTracker(
 		return nil, err
 	}
 	t.metrics.safeErrorRate = metrics.GetOrRegisterMeter(
-		"tracker,type=safe send_error_rate",
+		"tracker,type=safe kafka_send_error_rate",
 		nil)
 
 	return t, nil
