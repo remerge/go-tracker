@@ -34,7 +34,6 @@ func NewKafkaTracker(
 	t = &KafkaTracker{}
 	t.Metadata = metadata
 
-	// TODO (Aleksandr Dorofeev): Add metrics registry to arguments
 	t.metrics.registry = metrics.DefaultRegistry
 
 	// fast producer
