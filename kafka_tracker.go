@@ -60,9 +60,9 @@ func NewKafkaTracker(
 	go func() {
 		for fastErr := range t.kafka.fast.Errors() {
 			t.metrics.fastErrorRate.Mark(1)
-			_ = log.WithFields(cue.Fields{
+			log.WithFields(cue.Fields{
 				"topic": fastErr.Msg.Topic,
-			}).Error(fastErr.Err, "send fast message failed")
+			}).Warnf("send fast message failed", fastErr.Err)
 		}
 	}()
 
