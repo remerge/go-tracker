@@ -12,7 +12,6 @@ import (
 type KafkaTracker struct {
 	BaseTracker
 	metrics struct {
-		// TODO (Aleksandr Dorofeev): Provide registry to Sarama
 		fastErrorRate metrics.Meter
 		safeErrorRate metrics.Meter
 	}
