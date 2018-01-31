@@ -8,6 +8,13 @@ import (
 	"github.com/remerge/cue"
 )
 
+// KafkaTrackerConfig is init configuration for KafkaTracker
+type KafkaTrackerConfig struct {
+	Brokers []string
+	Metadata *EventMetadata
+	MetricsRegistry metrics.Registry
+}
+
 // KafkaTracker is a tracker that sends messages to Apache Kafka.
 type KafkaTracker struct {
 	BaseTracker
@@ -25,25 +32,33 @@ type KafkaTracker struct {
 var _ Tracker = (*KafkaTracker)(nil)
 
 // NewKafkaTracker creates a new tracker connected to a kafka cluster.
-func NewKafkaTracker(
-	brokers []string,
-	metadata *EventMetadata,
-) (t *KafkaTracker, err error) {
-	log.WithValue("brokers", brokers).Info("starting tracker")
+func NewKafkaTracker(brokers []string,
+	metadata *EventMetadata) (t *KafkaTracker, err error) {
+	return NewKafkaTrackerConfig(KafkaTrackerConfig{
+		Brokers: brokers,
+		Metadata: metadata,
+		MetricsRegistry: metrics.DefaultRegistry,
+	})
+}
+
+// NewKafkaTrackerConfig accepts configuration and creates a new tracker
+// connected to a kafka cluster.
+func NewKafkaTrackerConfig(trackerConfig KafkaTrackerConfig) (t *KafkaTracker,
+	err error) {
+	log.WithValue("brokers", trackerConfig.Brokers).Info("starting tracker")
 
 	t = &KafkaTracker{}
-	t.Metadata = metadata
-
-	t.metrics.registry = metrics.DefaultRegistry
+	t.Metadata = trackerConfig.Metadata
+	t.metrics.registry = trackerConfig.MetricsRegistry
 
 	// fast producer
 	config := sarama.NewConfig()
 	config.ClientID = fmt.Sprintf(
 		"tracker.fast-%s-%s-%s-%s",
-		metadata.Environment,
-		metadata.Cluster,
-		metadata.Host,
-		metadata.Service,
+		trackerConfig.Metadata.Environment,
+		trackerConfig.Metadata.Cluster,
+		trackerConfig.Metadata.Host,
+		trackerConfig.Metadata.Service,
 	)
 
 	config.Producer.Return.Successes = false
@@ -57,7 +72,7 @@ func NewKafkaTracker(
 		"tracker,type=fast kafka_produce_error_rate",
 		nil)
 
-	t.kafka.fast, err = sarama.NewAsyncProducer(brokers, config)
+	t.kafka.fast, err = sarama.NewAsyncProducer(trackerConfig.Brokers, config)
 	if err != nil {
 		return nil, err
 	}
@@ -74,10 +89,10 @@ func NewKafkaTracker(
 	config = sarama.NewConfig()
 	config.ClientID = fmt.Sprintf(
 		"tracker.safe-%s-%s-%s-%s",
-		metadata.Environment,
-		metadata.Cluster,
-		metadata.Host,
-		metadata.Service,
+		trackerConfig.Metadata.Environment,
+		trackerConfig.Metadata.Cluster,
+		trackerConfig.Metadata.Host,
+		trackerConfig.Metadata.Service,
 	)
 
 	config.Producer.Return.Successes = true
@@ -87,7 +102,7 @@ func NewKafkaTracker(
 	config.MetricRegistry = metrics.NewPrefixedChildRegistry(
 		t.metrics.registry, "tracker,type=safe kafka_")
 
-	t.kafka.safe, err = sarama.NewSyncProducer(brokers, config)
+	t.kafka.safe, err = sarama.NewSyncProducer(trackerConfig.Brokers, config)
 	if err != nil {
 		_ = log.Error(t.kafka.fast.Close(), "failed to close fast producer")
 		return nil, err
