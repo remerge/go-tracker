@@ -4,12 +4,18 @@ import (
 	"fmt"
 
 	"github.com/Shopify/sarama"
+	"github.com/rcrowley/go-metrics"
 	"github.com/remerge/cue"
 )
 
 // KafkaTracker is a tracker that sends messages to Apache Kafka.
 type KafkaTracker struct {
 	BaseTracker
+	metrics struct {
+		registry metrics.Registry
+		fastErrorRate metrics.Meter
+		safeErrorRate metrics.Meter
+	}
 	kafka struct {
 		fast sarama.AsyncProducer
 		safe sarama.SyncProducer
@@ -28,6 +34,8 @@ func NewKafkaTracker(
 	t = &KafkaTracker{}
 	t.Metadata = metadata
 
+	t.metrics.registry = metrics.DefaultRegistry
+
 	// fast producer
 	config := sarama.NewConfig()
 	config.ClientID = fmt.Sprintf(
@@ -39,15 +47,28 @@ func NewKafkaTracker(
 	)
 
 	config.Producer.Return.Successes = false
-	config.Producer.Return.Errors = false
+	config.Producer.Return.Errors = true
 	config.Producer.RequiredAcks = sarama.NoResponse
 	config.Producer.Compression = sarama.CompressionSnappy
 	config.ChannelBufferSize = 131072
+	config.MetricRegistry = metrics.NewPrefixedChildRegistry(
+		t.metrics.registry, "tracker,type=fast kafka_")
+	t.metrics.fastErrorRate = metrics.GetOrRegisterMeter(
+		"tracker,type=fast kafka_produce_error_rate",
+		nil)
 
 	t.kafka.fast, err = sarama.NewAsyncProducer(brokers, config)
 	if err != nil {
 		return nil, err
 	}
+	go func() {
+		for fastErr := range t.kafka.fast.Errors() {
+			t.metrics.fastErrorRate.Mark(1)
+			log.WithFields(cue.Fields{
+				"topic": fastErr.Msg.Topic,
+			}).Warnf("send fast message failed", fastErr.Err)
+		}
+	}()
 
 	// safe producer
 	config = sarama.NewConfig()
@@ -63,12 +84,17 @@ func NewKafkaTracker(
 	config.Producer.Return.Errors = true
 	config.Producer.RequiredAcks = sarama.WaitForLocal
 	config.Producer.Compression = sarama.CompressionSnappy
+	config.MetricRegistry = metrics.NewPrefixedChildRegistry(
+		t.metrics.registry, "tracker,type=safe kafka_")
 
 	t.kafka.safe, err = sarama.NewSyncProducer(brokers, config)
 	if err != nil {
 		_ = log.Error(t.kafka.fast.Close(), "failed to close fast producer")
 		return nil, err
 	}
+	t.metrics.safeErrorRate = metrics.GetOrRegisterMeter(
+		"tracker,type=safe kafka_produce_error_rate",
+		nil)
 
 	return t, nil
 }
@@ -120,6 +146,9 @@ func (t *KafkaTracker) SafeMessage(topic string, message interface{}) error {
 		Topic: topic,
 		Value: sarama.ByteEncoder(buf),
 	})
+	if err != nil {
+		t.metrics.safeErrorRate.Mark(1)
+	}
 
 	return err
 }
