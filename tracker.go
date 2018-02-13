@@ -31,9 +31,11 @@ func (t *BaseTracker) Encode(message interface{}) ([]byte, error) {
 	case string:
 		return []byte(m), nil
 	case Event:
-		m.SetMetadata(t.Metadata)
+		if t.Metadata != nil {
+			m.SetMetadata(t.Metadata)
+		}
 		m.SetTimestamp(timestr.ISO8601())
-		return json.Marshal(m)
+		return m.MarshalJSON()
 	case map[string]interface{}:
 		if _, found := m["ts"]; !found {
 			m["ts"] = timestr.ISO8601()

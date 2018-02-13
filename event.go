@@ -1,10 +1,13 @@
 package tracker
 
+import "encoding/json"
+
 // Event is a generic interface for accepting structured messages that have
 // metadata and can be serialized.
 type Event interface {
 	SetMetadata(metadata *EventMetadata)
 	SetTimestamp(ts string)
+	MarshalJSON() ([]byte, error)
 }
 
 // EventMetadata represents fields in the Event that are set automatically by
@@ -28,6 +31,11 @@ var _ Event = (*EventBase)(nil)
 // SetTimestamp sets the timestamp of the message/event.
 func (eb *EventBase) SetTimestamp(ts string) {
 	eb.Ts = ts
+}
+
+// MarshalJSON marshals the event using the Go default json encoder
+func (eb *EventBase) MarshalJSON() ([]byte, error) {
+	return json.Marshal(Event(eb))
 }
 
 // SetMetadata sets all empty fields in EventBase to values supplied by
