@@ -10,8 +10,8 @@ import (
 
 // KafkaTrackerConfig is init configuration for KafkaTracker
 type KafkaTrackerConfig struct {
-	Brokers []string
-	Metadata *EventMetadata
+	Brokers         []string
+	Metadata        *EventMetadata
 	MetricsRegistry metrics.Registry
 }
 
@@ -19,7 +19,7 @@ type KafkaTrackerConfig struct {
 type KafkaTracker struct {
 	BaseTracker
 	metrics struct {
-		registry metrics.Registry
+		registry      metrics.Registry
 		fastErrorRate metrics.Meter
 		safeErrorRate metrics.Meter
 	}
@@ -35,8 +35,8 @@ var _ Tracker = (*KafkaTracker)(nil)
 func NewKafkaTracker(brokers []string,
 	metadata *EventMetadata) (t *KafkaTracker, err error) {
 	return NewKafkaTrackerConfig(KafkaTrackerConfig{
-		Brokers: brokers,
-		Metadata: metadata,
+		Brokers:         brokers,
+		Metadata:        metadata,
 		MetricsRegistry: metrics.DefaultRegistry,
 	})
 }
