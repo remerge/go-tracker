@@ -53,6 +53,7 @@ func NewKafkaTrackerConfig(trackerConfig KafkaTrackerConfig) (t *KafkaTracker,
 
 	// fast producer
 	config := sarama.NewConfig()
+	config.Version = sarama.V0_10_0_0
 	config.ClientID = fmt.Sprintf(
 		"tracker.fast-%s-%s-%s-%s",
 		trackerConfig.Metadata.Environment,
@@ -87,6 +88,7 @@ func NewKafkaTrackerConfig(trackerConfig KafkaTrackerConfig) (t *KafkaTracker,
 
 	// safe producer
 	config = sarama.NewConfig()
+	config.Version = sarama.V0_10_0_0
 	config.ClientID = fmt.Sprintf(
 		"tracker.safe-%s-%s-%s-%s",
 		trackerConfig.Metadata.Environment,
