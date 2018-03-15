@@ -169,3 +169,12 @@ func (t *KafkaTracker) SafeMessage(topic string, message interface{}) error {
 
 	return err
 }
+
+func (t *KafkaTracker) CheckHealth() (err error) {
+	safeRate := t.metrics.safeErrorRate.Rate1()
+	fastRate := t.metrics.fastErrorRate.Rate1()
+	if safeRate > 0 || fastRate > 0 {
+		return fmt.Errorf(`send errors: fast=%f safe=%f`, safeRate, fastRate)
+	}
+	return nil
+}

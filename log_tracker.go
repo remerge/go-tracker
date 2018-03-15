@@ -49,3 +49,7 @@ func (t *LogTracker) logMessage(
 
 	return nil
 }
+
+func (t *LogTracker) CheckHealth() error {
+	return nil
+}
