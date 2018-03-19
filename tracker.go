@@ -15,6 +15,7 @@ type Tracker interface {
 	Close()
 	FastMessage(topic string, message interface{}) error
 	SafeMessage(topic string, message interface{}) error
+	CheckHealth() error
 }
 
 // BaseTracker is a base class for implementing trackers

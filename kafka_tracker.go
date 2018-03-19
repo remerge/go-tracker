@@ -71,7 +71,7 @@ func NewKafkaTrackerConfig(trackerConfig KafkaTrackerConfig) (t *KafkaTracker,
 		t.metrics.registry, "tracker,type=fast kafka_")
 	t.metrics.fastErrorRate = metrics.GetOrRegisterMeter(
 		"tracker,type=fast kafka_produce_error_rate",
-		nil)
+		t.metrics.registry)
 
 	t.kafka.fast, err = sarama.NewAsyncProducer(trackerConfig.Brokers, config)
 	if err != nil {
@@ -111,7 +111,7 @@ func NewKafkaTrackerConfig(trackerConfig KafkaTrackerConfig) (t *KafkaTracker,
 	}
 	t.metrics.safeErrorRate = metrics.GetOrRegisterMeter(
 		"tracker,type=safe kafka_produce_error_rate",
-		nil)
+		t.metrics.registry)
 
 	return t, nil
 }
@@ -168,4 +168,13 @@ func (t *KafkaTracker) SafeMessage(topic string, message interface{}) error {
 	}
 
 	return err
+}
+
+func (t *KafkaTracker) CheckHealth() (err error) {
+	safeRate := t.metrics.safeErrorRate.Rate1()
+	fastRate := t.metrics.fastErrorRate.Rate1()
+	if safeRate > 0 || fastRate > 0 {
+		return fmt.Errorf(`send errors: fast=%f safe=%f`, safeRate, fastRate)
+	}
+	return nil
 }

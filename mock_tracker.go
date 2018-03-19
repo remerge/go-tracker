@@ -48,3 +48,7 @@ func (t *MockTracker) FastMessage(topic string, message interface{}) error {
 func (t *MockTracker) SafeMessage(topic string, message interface{}) error {
 	return t.FastMessage(topic, message)
 }
+
+func (t *MockTracker) CheckHealth() error {
+	return nil
+}
