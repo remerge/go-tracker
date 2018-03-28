@@ -35,9 +35,11 @@ func main() {
 
 	// #nosec
 	_ = log.Error(kt.FastMessage("test", event), "failed to send fast message")
+	_ = log.Error(kt.FastMessageWithKey("test", event, []byte("key")), "failed to send fast message")
 
 	// #nosec
 	_ = log.Error(kt.SafeMessage("test", event), "failed to send safe message")
+	_ = log.Error(kt.SafeMessageWithKey("test", event, []byte("key")), "failed to send fast message")
 
 	kt.Close()
 }

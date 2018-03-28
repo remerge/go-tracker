@@ -15,6 +15,8 @@ type Tracker interface {
 	Close()
 	FastMessage(topic string, message interface{}) error
 	SafeMessage(topic string, message interface{}) error
+	FastMessageWithKey(topic string, message interface{}, key []byte) error
+	SafeMessageWithKey(topic string, message interface{}, key []byte) error
 	CheckHealth() error
 }
 

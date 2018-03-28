@@ -15,7 +15,11 @@ ifeq ($(GOTEST_TIMEOUT),)
 endif
 
 ifeq ($(GOMETALINTER_OPTS),)
-	GOMETALINTER_OPTS=--enable-all --tests
+	GOMETALINTER_OPTS= \
+		--enable-all \
+		--disable lll \
+		--disable dupl \
+		--tests
 endif
 
 ifeq ($(GOMETALINTER_EXCLUDES),)

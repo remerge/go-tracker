@@ -132,50 +132,65 @@ func (t *KafkaTracker) Close() {
 }
 
 // FastMessage sends a message without waiting for confirmation.
-func (t *KafkaTracker) FastMessage(topic string, message interface{}) error {
-	buf, err := t.Encode(message)
+func (t *KafkaTracker) FastMessage(topic string, value interface{}) error {
+	return t.FastMessageWithKey(topic, value, nil)
+}
+
+// FastMessageWithKey sends a message without waiting for confirmation.
+func (t *KafkaTracker) FastMessageWithKey(topic string, value interface{}, key []byte) error {
+	message, err := t.generateMessage(topic, "fast", value, key)
 	if err != nil {
 		return err
 	}
 
-	if log.EnabledFor(cue.DEBUG) {
-		log.WithFields(cue.Fields{
-			"topic":   topic,
-			"message": string(buf),
-		}).Debug("sending fast message")
-	}
-
-	t.kafka.fast.Input() <- &sarama.ProducerMessage{
-		Topic: topic,
-		Value: sarama.ByteEncoder(buf),
-	}
+	t.kafka.fast.Input() <- message
 
 	return nil
 }
 
 // SafeMessage sends a message and waits for confirmation.
-func (t *KafkaTracker) SafeMessage(topic string, message interface{}) error {
-	buf, err := t.Encode(message)
+func (t *KafkaTracker) SafeMessage(topic string, value interface{}) error {
+	return t.SafeMessageWithKey(topic, value, nil)
+}
+
+// SafeMessageWithKey sends a message and waits for confirmation.
+func (t *KafkaTracker) SafeMessageWithKey(topic string, value interface{}, key []byte) error {
+	message, err := t.generateMessage(topic, "safe", value, key)
 	if err != nil {
 		return err
 	}
 
-	if log.EnabledFor(cue.DEBUG) {
-		log.WithFields(cue.Fields{
-			"topic":   topic,
-			"message": string(buf),
-		}).Debug("sending safe message")
-	}
-
-	_, _, err = t.kafka.safe.SendMessage(&sarama.ProducerMessage{
-		Topic: topic,
-		Value: sarama.ByteEncoder(buf),
-	})
+	_, _, err = t.kafka.safe.SendMessage(message)
 	if err != nil {
 		t.metrics.safeErrorRate.Mark(1)
 	}
 
 	return err
+}
+
+func (t *KafkaTracker) generateMessage(topic string, typ string, value interface{}, key []byte) (*sarama.ProducerMessage, error) {
+	valueBuf, err := t.Encode(value)
+	if err != nil {
+		return nil, err
+	}
+
+	if log.EnabledFor(cue.DEBUG) {
+		log.WithFields(cue.Fields{
+			"topic": topic,
+			"value": string(valueBuf),
+			"key":   key,
+		}).Debugf("sending %s message", typ)
+	}
+
+	message := sarama.ProducerMessage{
+		Topic: topic,
+		Value: sarama.ByteEncoder(valueBuf),
+	}
+	if key != nil {
+		message.Key = sarama.ByteEncoder(key)
+	}
+
+	return &message, nil
 }
 
 func (t *KafkaTracker) CheckHealth() (err error) {
