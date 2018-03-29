@@ -13,6 +13,7 @@ type KafkaTrackerConfig struct {
 	Brokers         []string
 	Metadata        *EventMetadata
 	MetricsRegistry metrics.Registry
+	Compression     sarama.CompressionCodec
 }
 
 // KafkaTracker is a tracker that sends messages to Apache Kafka.
@@ -31,6 +32,18 @@ type KafkaTracker struct {
 
 var _ Tracker = (*KafkaTracker)(nil)
 
+// NewKafkaTrackerForTests does not add compression
+// since it is not working on wurstmeister
+func NewKafkaTrackerForTests(brokers []string,
+	metadata *EventMetadata) (t *KafkaTracker, err error) {
+	return NewKafkaTrackerConfig(KafkaTrackerConfig{
+		Brokers:         brokers,
+		Metadata:        metadata,
+		MetricsRegistry: metrics.DefaultRegistry,
+		Compression:     sarama.CompressionNone,
+	})
+}
+
 // NewKafkaTracker creates a new tracker connected to a kafka cluster.
 func NewKafkaTracker(brokers []string,
 	metadata *EventMetadata) (t *KafkaTracker, err error) {
@@ -38,6 +51,7 @@ func NewKafkaTracker(brokers []string,
 		Brokers:         brokers,
 		Metadata:        metadata,
 		MetricsRegistry: metrics.DefaultRegistry,
+		Compression:     sarama.CompressionSnappy,
 	})
 }
 
@@ -65,7 +79,7 @@ func NewKafkaTrackerConfig(trackerConfig KafkaTrackerConfig) (t *KafkaTracker,
 	config.Producer.Return.Successes = false
 	config.Producer.Return.Errors = true
 	config.Producer.RequiredAcks = sarama.NoResponse
-	config.Producer.Compression = sarama.CompressionSnappy
+	config.Producer.Compression = trackerConfig.Compression
 	config.ChannelBufferSize = 131072
 	config.MetricRegistry = metrics.NewPrefixedChildRegistry(
 		t.metrics.registry, "tracker,type=fast kafka_")
@@ -100,7 +114,7 @@ func NewKafkaTrackerConfig(trackerConfig KafkaTrackerConfig) (t *KafkaTracker,
 	config.Producer.Return.Successes = true
 	config.Producer.Return.Errors = true
 	config.Producer.RequiredAcks = sarama.WaitForLocal
-	config.Producer.Compression = sarama.CompressionSnappy
+	config.Producer.Compression = trackerConfig.Compression
 	config.MetricRegistry = metrics.NewPrefixedChildRegistry(
 		t.metrics.registry, "tracker,type=safe kafka_")
 
