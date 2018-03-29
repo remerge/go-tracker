@@ -1,6 +1,7 @@
 package tracker
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/remerge/go-timestr"
@@ -38,4 +39,28 @@ func (suite *EventTestSuite) TestEventMetadata() {
 	assert.Equal(suite.T(), eb.Cluster, "t1")
 	assert.Equal(suite.T(), eb.Host, "testhost")
 	assert.Equal(suite.T(), eb.Release, "123abc")
+}
+
+type testEvent struct {
+	EventBase
+	MyField string
+}
+
+func (suite *EventTestSuite) TestEventSerialize() {
+	m := &EventMetadata{
+		Service:     "test",
+		Environment: "testing",
+		Cluster:     "t1",
+		Host:        "testhost",
+		Release:     "123abc",
+	}
+
+	event := &testEvent{
+		MyField: "foo",
+	}
+	event.SetMetadata(m)
+
+	bytes, err := event.MarshalToJson()
+	assert.Nil(suite.T(), err)
+	fmt.Println(string(bytes))
 }
