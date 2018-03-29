@@ -60,7 +60,7 @@ func (suite *EventTestSuite) TestEventSerialize() {
 	}
 	event.SetMetadata(m)
 
-	bytes, err := event.MarshalToJson()
+	bytes, err := event.MarshalJSON()
 	assert.Nil(suite.T(), err)
 	fmt.Println(string(bytes))
 }
