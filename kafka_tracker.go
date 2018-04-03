@@ -32,18 +32,6 @@ type KafkaTracker struct {
 
 var _ Tracker = (*KafkaTracker)(nil)
 
-// NewKafkaTrackerForTests does not add compression
-// since it is not working on wurstmeister
-func NewKafkaTrackerForTests(brokers []string,
-	metadata *EventMetadata) (t *KafkaTracker, err error) {
-	return NewKafkaTrackerConfig(KafkaTrackerConfig{
-		Brokers:         brokers,
-		Metadata:        metadata,
-		MetricsRegistry: metrics.DefaultRegistry,
-		Compression:     sarama.CompressionNone,
-	})
-}
-
 // NewKafkaTracker creates a new tracker connected to a kafka cluster.
 func NewKafkaTracker(brokers []string,
 	metadata *EventMetadata) (t *KafkaTracker, err error) {
