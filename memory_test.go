@@ -4,8 +4,20 @@ import (
 	"runtime"
 	"testing"
 
+	"github.com/Shopify/sarama"
+	metrics "github.com/rcrowley/go-metrics"
 	"github.com/stretchr/testify/assert"
 )
+
+func newKafkaTrackerForTests(brokers []string,
+	metadata *EventMetadata) (t *KafkaTracker, err error) {
+	return NewKafkaTrackerConfig(KafkaTrackerConfig{
+		Brokers:         brokers,
+		Metadata:        metadata,
+		MetricsRegistry: metrics.DefaultRegistry,
+		Compression:     sarama.CompressionNone,
+	})
+}
 
 func TestKafkaTrackerMemoryAllocation(t *testing.T) {
 	//cue.Collect(cue.DEBUG, collector.Terminal{}.New())
@@ -21,7 +33,7 @@ func TestKafkaTrackerMemoryAllocation(t *testing.T) {
 		Release:     "master",
 	}
 
-	kt, err := NewKafkaTrackerForTests([]string{"localhost:9092"}, metadata)
+	kt, err := newKafkaTrackerForTests([]string{"localhost:9092"}, metadata)
 	assert.Nil(t, err)
 	lt := NewLogTracker("log", metadata)
 	messagesCount := 100
