@@ -24,7 +24,7 @@ imports:
 - name: github.com/rcrowley/go-metrics
   version: 8732c616f52954686704c8645fe1a9d59e9df7c1
 - name: github.com/remerge/cue
-  version: 28dfe61cfc192ac3fce01cdead089ff01549cdfd
+  version: 5ce627d813ef214d807f1a0ce88bf1ab48bf1f1c
   subpackages:
   - collector
   - format
