@@ -42,10 +42,12 @@ func (t *LogTracker) logMessage(
 		return err
 	}
 
-	t.logger.WithFields(cue.Fields{
-		"topic":   topic,
-		"message": string(buf),
-	}).Info(typ + " message")
+	if log.EnabledFor(cue.INFO) {
+		t.logger.WithFields(cue.Fields{
+			"topic":   topic,
+			"message": string(buf),
+		}).Info(typ + " message")
+	}
 
 	return nil
 }

@@ -82,9 +82,11 @@ func NewKafkaTrackerConfig(trackerConfig KafkaTrackerConfig) (t *KafkaTracker,
 	go func() {
 		for fastErr := range t.kafka.fast.Errors() {
 			t.metrics.fastErrorRate.Mark(1)
-			log.WithFields(cue.Fields{
-				"topic": fastErr.Msg.Topic,
-			}).Warnf("send fast message failed", fastErr.Err)
+			if log.EnabledFor(cue.WARN) {
+				log.WithFields(cue.Fields{
+					"topic": fastErr.Msg.Topic,
+				}).Warnf("send fast message failed", fastErr.Err)
+			}
 		}
 	}()
 
@@ -136,10 +138,12 @@ func (t *KafkaTracker) FastMessage(topic string, message interface{}) error {
 		return err
 	}
 
-	log.WithFields(cue.Fields{
-		"topic":   topic,
-		"message": string(buf),
-	}).Debug("sending fast message")
+	if log.EnabledFor(cue.DEBUG) {
+		log.WithFields(cue.Fields{
+			"topic":   topic,
+			"message": string(buf),
+		}).Debug("sending fast message")
+	}
 
 	t.kafka.fast.Input() <- &sarama.ProducerMessage{
 		Topic: topic,
@@ -156,10 +160,12 @@ func (t *KafkaTracker) SafeMessage(topic string, message interface{}) error {
 		return err
 	}
 
-	log.WithFields(cue.Fields{
-		"topic":   topic,
-		"message": string(buf),
-	}).Debug("sending safe message")
+	if log.EnabledFor(cue.DEBUG) {
+		log.WithFields(cue.Fields{
+			"topic":   topic,
+			"message": string(buf),
+		}).Debug("sending safe message")
+	}
 
 	_, _, err = t.kafka.safe.SendMessage(&sarama.ProducerMessage{
 		Topic: topic,
