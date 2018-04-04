@@ -23,30 +23,40 @@ func (t *LogTracker) Close() {
 }
 
 // FastMessage sends a message without waiting for confirmation.
-func (t *LogTracker) FastMessage(topic string, message interface{}) error {
-	return t.logMessage("fast", topic, message)
+func (t *LogTracker) FastMessage(topic string, value interface{}) error {
+	return t.logMessage("fast", topic, value, nil)
+}
+
+func (t *LogTracker) FastMessageWithKey(topic string, value interface{}, key []byte) error {
+	return t.logMessage("fast", topic, value, key)
 }
 
 // SafeMessage sends a message and waits for confirmation.
-func (t *LogTracker) SafeMessage(topic string, message interface{}) error {
-	return t.logMessage("safe", topic, message)
+func (t *LogTracker) SafeMessage(topic string, value interface{}) error {
+	return t.logMessage("safe", topic, value, nil)
+}
+
+func (t *LogTracker) SafeMessageWithKey(topic string, value interface{}, key []byte) error {
+	return t.logMessage("safe", topic, value, key)
 }
 
 func (t *LogTracker) logMessage(
 	typ string,
 	topic string,
-	message interface{},
+	value interface{},
+	key []byte,
 ) error {
-	buf, err := t.Encode(message)
+	valueBuf, err := t.Encode(value)
 	if err != nil {
 		return err
 	}
 
-	if log.EnabledFor(cue.INFO) {
+	if t.logger.EnabledFor(cue.INFO) {
 		t.logger.WithFields(cue.Fields{
-			"topic":   topic,
-			"message": string(buf),
-		}).Info(typ + " message")
+			"topic": topic,
+			"value": string(valueBuf),
+			"key":   string(key),
+		}).Infof("%s message", typ)
 	}
 
 	return nil

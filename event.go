@@ -1,6 +1,8 @@
 package tracker
 
-import "encoding/json"
+import (
+	"encoding/json"
+)
 
 // Event is a generic interface for accepting structured messages that have
 // metadata and can be serialized.
