@@ -3,8 +3,9 @@ package tracker
 // MockTracker is a tracker with in-memory storage used for testing.
 type MockTracker struct {
 	BaseTracker
-	Messages map[string][][]byte
-	ids      map[string][][]byte
+	Messages    map[string][][]byte
+	ids         map[string][][]byte
+	idxPosition int
 }
 
 var _ Tracker = (*MockTracker)(nil)
@@ -16,6 +17,15 @@ func NewMockTracker(metadata *EventMetadata) *MockTracker {
 	t.Messages = make(map[string][][]byte)
 	t.ids = make(map[string][][]byte)
 	return t
+}
+
+func (t *MockTracker) Next(topic string) ([]byte, []byte) {
+	key := t.GetKey(topic, t.idxPosition)
+	value := t.Get(topic, t.idxPosition)
+	if key != nil && value != nil {
+		t.idxPosition++
+	}
+	return key, value
 }
 
 // Get a message from the mock broker.
