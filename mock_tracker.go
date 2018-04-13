@@ -22,7 +22,7 @@ func NewMockTracker(metadata *EventMetadata) *MockTracker {
 func (t *MockTracker) Next(topic string) ([]byte, []byte) {
 	key := t.GetKey(topic, t.idxPosition)
 	value := t.Get(topic, t.idxPosition)
-	if key != nil && value != nil {
+	if key != nil || value != nil {
 		t.idxPosition++
 	}
 	return key, value
@@ -35,7 +35,7 @@ func (t *MockTracker) Get(topic string, idx int) []byte {
 	}
 
 	msgs := t.Messages[topic]
-	if msgs == nil || len(msgs) < idx {
+	if msgs == nil || len(msgs) <= idx {
 		return nil
 	}
 
@@ -49,7 +49,7 @@ func (t *MockTracker) GetKey(topic string, idx int) []byte {
 	}
 
 	msgs := t.ids[topic]
-	if msgs == nil || len(msgs) < idx {
+	if msgs == nil || len(msgs) <= idx {
 		return nil
 	}
 
