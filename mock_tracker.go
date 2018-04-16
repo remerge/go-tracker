@@ -17,11 +17,8 @@ type MockTopicIterator struct {
 func (i *MockTopicIterator) Next() ([]byte, []byte, bool) {
 	key := i.tracker.GetKey(i.topic, i.idxPosition)
 	value := i.tracker.Get(i.topic, i.idxPosition)
-	if len(i.tracker.Messages[i.topic]) > i.idxPosition+1 {
-		i.idxPosition++
-		return key, value, true
-	}
-	return nil, nil, false
+	i.idxPosition++
+	return key, value, len(i.tracker.Messages[i.topic]) > i.idxPosition
 }
 
 var _ Tracker = (*MockTracker)(nil)

@@ -48,10 +48,6 @@ func TestMockTrackerTopicIteration(t *testing.T) {
 	key, value, canContinue = it.Next()
 	require.Equal(t, string(key), "key3")
 	require.Equal(t, string(value), "message3")
-	require.True(t, canContinue)
-	key, value, canContinue = it.Next()
-	require.Nil(t, key)
-	require.Nil(t, value)
 	require.False(t, canContinue)
 }
 
