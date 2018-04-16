@@ -23,11 +23,11 @@ func TestMockTrackerBasic(t *testing.T) {
 	subject := trackerWithSampleData(topic, t)
 
 	value := subject.Get(topic, 0)
-	require.Equal(t, string(value), "message1")
+	require.Equal(t, "message1", string(value))
 	value = subject.Get(topic, 1)
-	require.Equal(t, string(value), "message2")
+	require.Equal(t, "message2", string(value))
 	value = subject.Get(topic, 2)
-	require.Equal(t, string(value), "message3")
+	require.Equal(t, "message3", string(value))
 	value = subject.Get(topic, 3)
 	require.Nil(t, value)
 }
@@ -39,15 +39,15 @@ func TestMockTrackerTopicIteration(t *testing.T) {
 	// Check iteration
 	key, value, canContinue := it.Next()
 	require.Nil(t, key)
-	require.Equal(t, string(value), "message1")
+	require.Equal(t, "message1", string(value))
 	require.True(t, canContinue)
 	key, value, canContinue = it.Next()
 	require.Nil(t, key)
-	require.Equal(t, string(value), "message2")
+	require.Equal(t, "message2", string(value))
 	require.True(t, canContinue)
 	key, value, canContinue = it.Next()
-	require.Equal(t, string(key), "key3")
-	require.Equal(t, string(value), "message3")
+	require.Equal(t, "key3", string(key))
+	require.Equal(t, "message3", string(value))
 	require.False(t, canContinue)
 }
 
