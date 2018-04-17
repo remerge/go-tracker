@@ -2,11 +2,11 @@ version: '2.1'
 
 services:
   zookeeper:
-    image: wurstmeister/zookeeper
+    image: wurstmeister/zookeeper:1.0.0
     ports:
       - "2181:2181"
   kafka:
-    image: wurstmeister/kafka
+    image: wurstmeister/kafka:1.0.0
     ports:
       - "9092:9092"
     depends_on:
