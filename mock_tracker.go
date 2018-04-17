@@ -7,6 +7,20 @@ type MockTracker struct {
 	ids      map[string][][]byte
 }
 
+type MockTopicIterator struct {
+	idxPosition int
+	topic       string
+	tracker     *MockTracker
+}
+
+//Next Return key, value, and false if there are no more messages
+func (i *MockTopicIterator) Next() ([]byte, []byte, bool) {
+	key := i.tracker.GetKey(i.topic, i.idxPosition)
+	value := i.tracker.Get(i.topic, i.idxPosition)
+	i.idxPosition++
+	return key, value, len(i.tracker.Messages[i.topic]) > i.idxPosition
+}
+
 var _ Tracker = (*MockTracker)(nil)
 
 // NewMockTracker creates a new mock tracker for testing.
@@ -18,6 +32,11 @@ func NewMockTracker(metadata *EventMetadata) *MockTracker {
 	return t
 }
 
+// Iterate returns you a topic iterator
+func (t *MockTracker) Iterate(topic string) MockTopicIterator {
+	return MockTopicIterator{topic: topic, tracker: t}
+}
+
 // Get a message from the mock broker.
 func (t *MockTracker) Get(topic string, idx int) []byte {
 	if len(t.Messages) == 0 {
@@ -25,7 +44,7 @@ func (t *MockTracker) Get(topic string, idx int) []byte {
 	}
 
 	msgs := t.Messages[topic]
-	if msgs == nil || len(msgs) < idx {
+	if msgs == nil || len(msgs) <= idx {
 		return nil
 	}
 
@@ -39,7 +58,7 @@ func (t *MockTracker) GetKey(topic string, idx int) []byte {
 	}
 
 	msgs := t.ids[topic]
-	if msgs == nil || len(msgs) < idx {
+	if msgs == nil || len(msgs) <= idx {
 		return nil
 	}
 
