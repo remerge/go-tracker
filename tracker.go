@@ -28,6 +28,9 @@ type BaseTracker struct {
 // Encode a message into bytes using `json.Marshal` after updating metadata
 // fields.
 func (t *BaseTracker) Encode(message interface{}) ([]byte, error) {
+	if withTs, ok := message.(EventWithTimestamp); ok {
+		withTs.SetTimestampFrom(timestr.Now(), timestr.ISO8601())
+	}
 	switch m := message.(type) {
 	case []byte:
 		return m, nil

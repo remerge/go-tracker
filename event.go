@@ -2,6 +2,7 @@ package tracker
 
 import (
 	"encoding/json"
+	"time"
 )
 
 // Event is a generic interface for accepting structured messages that have
@@ -10,6 +11,12 @@ type Event interface {
 	SetMetadata(metadata *EventMetadata)
 	SetTimestamp(ts string)
 	MarshalJSON() ([]byte, error)
+}
+
+// EventWithTime exists because the original Event interface accepts a string as a timestamp
+// and we don't want to break backwards compatibility for now
+type EventWithTimestamp interface {
+	SetTimestampFrom(time.Time, string)
 }
 
 // EventMetadata represents fields in the Event that are set automatically by
