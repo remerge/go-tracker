@@ -2,6 +2,7 @@ package tracker
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/remerge/cue"
 	"github.com/remerge/go-timestr"
@@ -20,34 +21,44 @@ type Tracker interface {
 	CheckHealth() error
 }
 
+type Timestampable interface {
+	SetTimestampFrom(time.Time, string)
+}
+
 // BaseTracker is a base class for implementing trackers
 type BaseTracker struct {
 	Metadata *EventMetadata
 }
 
-// Encode a message into bytes using `json.Marshal` after updating metadata
+// Encode a message into bytes, updating metadata if `Metadatable`, updating the
+// timestamp if `Timestampable`  and as json if implementing `json.Marshaler`. Falling back to `json.Marshal` otherwise
 // fields.
 func (t *BaseTracker) Encode(message interface{}) ([]byte, error) {
-	if withTs, ok := message.(EventWithTimestamp); ok {
-		withTs.SetTimestampFrom(timestr.Now(), timestr.ISO8601())
-	}
+	// basic types
 	switch m := message.(type) {
 	case []byte:
 		return m, nil
 	case string:
 		return []byte(m), nil
-	case Event:
-		if t.Metadata != nil {
-			m.SetMetadata(t.Metadata)
-		}
-		m.SetTimestamp(timestr.ISO8601())
-		return m.MarshalJSON()
 	case map[string]interface{}:
 		if _, found := m["ts"]; !found {
 			m["ts"] = timestr.ISO8601()
 		}
 		return json.Marshal(m)
-	default:
-		return json.Marshal(m)
 	}
+	if v, ok := message.(Timestampable); ok {
+		v.SetTimestampFrom(timestr.Now(), timestr.ISO8601())
+	}
+	if v, ok := message.(MetadatableSimple); ok {
+		v.SetMetadata(t.Metadata.Service, t.Metadata.Environment, t.Metadata.Cluster,
+			t.Metadata.Host, t.Metadata.Release)
+	}
+	if v, ok := message.(Metadatable); ok {
+		v.SetMetadata(t.Metadata)
+	}
+	if v, ok := message.(json.Marshaler); ok {
+		return v.MarshalJSON()
+	}
+	// fallback
+	return json.Marshal(message)
 }

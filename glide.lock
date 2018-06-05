@@ -29,7 +29,7 @@ imports:
   - collector
   - format
 - name: github.com/remerge/go-timestr
-  version: 26332ce36f5a67b310a11bb4ae1bde239cf31ab3
+  version: e115f77d6e01ef4fbe30d4e82fc42083c9719078
 - name: github.com/remerge/go-xorshift
   version: 38a062789887270f4b85fd03a1756560552eed97
 - name: github.com/Shopify/sarama
