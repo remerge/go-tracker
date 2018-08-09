@@ -16,6 +16,7 @@ endif
 
 ifeq ($(GOMETALINTER_OPTS),)
 	GOMETALINTER_OPTS= \
+		--errors -D gotype \
 		--enable-all \
 		--disable lll \
 		--disable dupl \

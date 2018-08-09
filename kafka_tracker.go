@@ -2,6 +2,7 @@ package tracker
 
 import (
 	"fmt"
+	"sync/atomic"
 
 	"github.com/Shopify/sarama"
 	"github.com/rcrowley/go-metrics"
@@ -28,6 +29,9 @@ type KafkaTracker struct {
 		fast sarama.AsyncProducer
 		safe sarama.SyncProducer
 	}
+
+	closed int32
+	closeCh chan struct{}
 }
 
 var _ Tracker = (*KafkaTracker)(nil)
@@ -49,8 +53,12 @@ func NewKafkaTrackerConfig(trackerConfig KafkaTrackerConfig) (t *KafkaTracker,
 	err error) {
 	log.WithValue("brokers", trackerConfig.Brokers).Info("starting tracker")
 
-	t = &KafkaTracker{}
-	t.Metadata = trackerConfig.Metadata
+	t = &KafkaTracker{
+		BaseTracker: BaseTracker{
+			Metadata: trackerConfig.Metadata,
+		},
+		closeCh: make(chan struct{}),
+	}
 	t.metrics.registry = trackerConfig.MetricsRegistry
 
 	// fast producer
@@ -80,12 +88,17 @@ func NewKafkaTrackerConfig(trackerConfig KafkaTrackerConfig) (t *KafkaTracker,
 		return nil, err
 	}
 	go func() {
-		for fastErr := range t.kafka.fast.Errors() {
-			t.metrics.fastErrorRate.Mark(1)
-			if log.EnabledFor(cue.WARN) {
-				log.WithFields(cue.Fields{
-					"topic": fastErr.Msg.Topic,
-				}).Warnf("send fast message failed", fastErr.Err)
+		for {
+			select {
+			case <-t.closeCh:
+				return
+			case fastErr := <-t.kafka.fast.Errors():
+				t.metrics.fastErrorRate.Mark(1)
+				if log.EnabledFor(cue.WARN) {
+					log.WithFields(cue.Fields{
+						"topic": fastErr.Msg.Topic,
+					}).Warnf("send fast message failed", fastErr.Err)
+				}
 			}
 		}
 	}()
@@ -129,6 +142,10 @@ func (t *KafkaTracker) Close() {
 	// shutdwn fast producer
 	log.Info("closing fast producer")
 	_ = log.Error(t.kafka.fast.Close(), "failed to close fast producer")
+
+	if atomic.CompareAndSwapInt32(&t.closed, 0, 1) {
+		close(t.closeCh)
+	}
 }
 
 // FastMessage sends a message without waiting for confirmation.
