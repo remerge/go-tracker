@@ -63,6 +63,7 @@ func TestBaseTrackerEncoding(t *testing.T) {
 		{&testEventSimple{}, `{"Service":"Service","Environment":"Environment","Cluster":"Cluster","Host":"Host","Release":"Release"}`},
 		{&customJsonEvent{}, "test"},
 		{&timestampableEvent{}, `{"Now":"1982-04-03T12:00:00Z"}`},
+		{nil, ""},
 	} {
 		actual, err := tracker.Encode(e.given)
 		assert.NoError(t, err)
