@@ -28,9 +28,9 @@ func (e *testEventSimple) SetMetadata(service, environment, cluster, host, relea
 	e.EventMetadata = &EventMetadata{service, environment, cluster, host, release}
 }
 
-type customJsonEvent struct{}
+type customJSONEvent struct{}
 
-func (*customJsonEvent) MarshalJSON() ([]byte, error) {
+func (*customJSONEvent) MarshalJSON() ([]byte, error) {
 	return []byte("test"), nil
 }
 
@@ -61,8 +61,9 @@ func TestBaseTrackerEncoding(t *testing.T) {
 		{map[string]interface{}{"hallo": "test"}, `{"hallo":"test","ts":"1982-04-03T12:00:00Z"}`},
 		{&testEvent{}, `{"Service":"Service","Environment":"Environment","Cluster":"Cluster","Host":"Host","Release":"Release"}`},
 		{&testEventSimple{}, `{"Service":"Service","Environment":"Environment","Cluster":"Cluster","Host":"Host","Release":"Release"}`},
-		{&customJsonEvent{}, "test"},
+		{&customJSONEvent{}, "test"},
 		{&timestampableEvent{}, `{"Now":"1982-04-03T12:00:00Z"}`},
+		{nil, ""},
 	} {
 		actual, err := tracker.Encode(e.given)
 		assert.NoError(t, err)

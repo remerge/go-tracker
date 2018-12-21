@@ -34,6 +34,12 @@ type BaseTracker struct {
 // timestamp if `Timestampable`  and as json if implementing `json.Marshaler`. Falling back to `json.Marshal` otherwise
 // fields.
 func (t *BaseTracker) Encode(message interface{}) ([]byte, error) {
+	// nil fallback
+	if message == nil {
+		// message should not be nil, as a fallback, treat that as a "tombstone" empty message
+		return []byte{}, nil
+	}
+
 	// basic types
 	switch m := message.(type) {
 	case []byte:

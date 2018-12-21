@@ -7,7 +7,6 @@ import (
 )
 
 type testEvent struct {
-	tracker.EventBase
 	MyField string
 }
 
