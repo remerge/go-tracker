@@ -30,7 +30,8 @@ ifeq ($(GOMETALINTER_EXCLUDES),)
 		--exclude "_test\.go:.*\((lll|unparam|gocyclo)\)$$" \
 		--exclude "comment should be of the form.*\(golint\)$$" \
 		--exclude "should have comment or be unexported.*\(golint\)$$" \
-		--exclude "Errors unhandled.,LOW,HIGH*\(gosec\)$$"
+		--exclude ".*Errors unhandled\.,LOW,HIGH \(gosec\)$$" \
+		--exclude ".*is a global variable \(gochecknoglobals\)$$"
 endif
 
 CODE_VERSION=$(TRAVIS_COMMIT)
