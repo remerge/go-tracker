@@ -2,6 +2,7 @@ package tracker
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/rcrowley/go-metrics"
@@ -101,6 +102,8 @@ func NewKafkaTrackerConfig(trackerConfig KafkaTrackerConfig) (t *KafkaTracker,
 		trackerConfig.Metadata.Service,
 	)
 
+	config.Producer.Retry.Max = 10
+	config.Producer.Retry.Backoff = 200 * time.Millisecond
 	config.Producer.Return.Successes = true
 	config.Producer.Return.Errors = true
 	config.Producer.RequiredAcks = sarama.WaitForLocal
