@@ -1,8 +1,11 @@
 package tracker
 
+import "sync"
+
 // MockTracker is a tracker with in-memory storage used for testing.
 type MockTracker struct {
 	BaseTracker
+	mapLock  sync.RWMutex
 	Messages map[string][][]byte
 	ids      map[string][][]byte
 }
@@ -39,6 +42,9 @@ func (t *MockTracker) Iterate(topic string) MockTopicIterator {
 
 // Get a message from the mock broker.
 func (t *MockTracker) Get(topic string, idx int) []byte {
+	t.mapLock.RLock()
+	defer t.mapLock.RUnlock()
+
 	if len(t.Messages) == 0 {
 		return nil
 	}
@@ -53,6 +59,9 @@ func (t *MockTracker) Get(topic string, idx int) []byte {
 
 // GetKey Gets a key from the mock broker.
 func (t *MockTracker) GetKey(topic string, idx int) []byte {
+	t.mapLock.RLock()
+	defer t.mapLock.RUnlock()
+
 	if len(t.Messages) == 0 {
 		return nil
 	}
@@ -70,6 +79,9 @@ func (t *MockTracker) Close() {
 }
 
 func (t *MockTracker) FastMessageWithKey(topic string, value interface{}, key []byte) error {
+	t.mapLock.Lock()
+	defer t.mapLock.Unlock()
+
 	valueBuf, err := t.Encode(value)
 	if err != nil {
 		return err
