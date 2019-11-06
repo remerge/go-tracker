@@ -21,8 +21,7 @@ jobs:
     steps:
       - add_ssh_keys:
           fingerprints:
-            # TODO: exchange with fingerprint of added SSH key that has access to GitHub
-            - "f7:b4:dd:16:39:97:49:de:90:85:ab:37:fd:92:77:44"
+            - "fe:e1:f3:39:6d:e1:71:31:eb:f8:58:c5:f3:71:de:b3"
       - checkout
       - run:
           name: Setup Git
