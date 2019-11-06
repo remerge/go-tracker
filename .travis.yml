@@ -1,23 +1,26 @@
-sudo: required
+sudo: false
 language: go
 
 go:
-  - "1.10"
+- "1.13"
 
 cache:
   directories:
-  - vendor
+  - $GOPATH/pkg/mod
+  - $GOPATH/bin
+  - $HOME/.cache/go-build
+
+branches:
+  only:
+    - master
+    - production
 
 before_install:
-  - docker-compose up -d
-
-install:
-- make dep
+- 'git config --global url.git@github.com:.insteadof https://github.com/'
 
 script:
-- make test clean
-- docker-compose logs
+- make lint test
 
 notifications:
   slack:
-    secure: 0e54WA4ajRmCDppHj55em66hrsjUlxquT8sUFBCp3Nii4zcnOZTKQkCU2B5sQDwQfD4Ex7l9RsHE0hwGW/eqOHm296uRHGN4LZ+uIHRx420ln3i6hZjiacOpMycaXpcKEqhcHKXqMmgh7PdnEziAvWc8SJz75sd1Gp8OxrCv0makqdyAdYxVyrOthzvw/Lws/WCPSS39c4ehlt7wEh0CjkFRKh7ZXe8A0FaxwVjNNdQT8Xa8tPv+SDcQnnCeCuaF6eJ/Kq4aSAetVmYuNgYEEotowTaj/+XsiyOhdY5kTKxAfAoKJtNj/o4vbLxvVEsxQ337YjGNqsrJNCPZDFg5CCpXmu2tT7Peu+HCtm7azqUnU1nGQcAhKN0H1fN2b5w+udXh3vjgvGFxvjlpA8itNO0wiJ1Vn/P04Y/+lvfZeugOJAKiKWbEMjzvYWSURSpgMaBeYqFVzGqm/tfjCWQoO2nJKxhDi4PcXi3LrD2Y8vD7zomUKFybhXzhDKrTH+fLhsyCxK+5wdTdJyQwcFMZYJHdhi/8QImkUnlibfFdxugdsT6hL/ejPum1rrVPDQvTUBFq3dZVvBAFv0YMU0Sjznn4A/y+s+2OLANTRKLVFjUn41evBwKBIl0HxebS6c2enKnQDbNdgSNyLtnMXLVi+kC+9oBDNxmVwDP5EyD33qo=
+    secure: JTOQ25Dh3Xoh3p9hbXsC+hhMP6XmYftjZjErrweX9fcRjJ7/vOmQ9md3Kg0ekweeiEh7ALJLLTnaV8rLO0AIhjYntAEMvRWprWF/cQGBeig1CoJgkoWGPn4dKULw1ONcw3LLhUxJeL6NImEuZA4d/lMeJx28jIdtU3s5jLJKkJI=
