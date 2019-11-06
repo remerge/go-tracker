@@ -26,6 +26,9 @@ jobs:
       - run:
           name: Setup Git
           command: ../setup-git.sh
+        - run:
+          name: Setup service specific dependencies
+          command: .circleci/setup.sh
       - restore_cache:
           keys:
             - modules-v1-{{ checksum "go.mod" }}
