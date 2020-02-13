@@ -1,6 +1,7 @@
 package tracker
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -8,6 +9,8 @@ import (
 	"github.com/rcrowley/go-metrics"
 	"github.com/remerge/cue"
 )
+
+var ErrSendClosedTracker = errors.New("attempt to send a message via closed tracker")
 
 // KafkaTrackerConfig is init configuration for KafkaTracker
 type KafkaTrackerConfig struct {
@@ -29,6 +32,7 @@ type KafkaTracker struct {
 		fast sarama.AsyncProducer
 		safe sarama.SyncProducer
 	}
+	closed bool
 }
 
 var _ Tracker = (*KafkaTracker)(nil)
@@ -125,6 +129,10 @@ func NewKafkaTrackerConfig(trackerConfig KafkaTrackerConfig) (t *KafkaTracker,
 
 // Close the tracker.
 func (t *KafkaTracker) Close() {
+	if !t.closed {
+		t.closed = true
+	}
+
 	// shutdown safe producer
 	log.Info("closing safe producer")
 	_ = log.Error(t.kafka.safe.Close(), "failed to close safe producer")
@@ -141,6 +149,10 @@ func (t *KafkaTracker) FastMessage(topic string, value interface{}) error {
 
 // FastMessageWithKey sends a message without waiting for confirmation.
 func (t *KafkaTracker) FastMessageWithKey(topic string, value interface{}, key []byte) error {
+	if t.closed {
+		return ErrSendClosedTracker
+	}
+
 	message, err := t.generateMessage(topic, "fast", value, key)
 	if err != nil {
 		return err
@@ -158,6 +170,10 @@ func (t *KafkaTracker) SafeMessage(topic string, value interface{}) error {
 
 // SafeMessageWithKey sends a message and waits for confirmation.
 func (t *KafkaTracker) SafeMessageWithKey(topic string, value interface{}, key []byte) error {
+	if t.closed {
+		return ErrSendClosedTracker
+	}
+
 	message, err := t.generateMessage(topic, "safe", value, key)
 	if err != nil {
 		return err
