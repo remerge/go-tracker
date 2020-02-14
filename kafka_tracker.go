@@ -1,16 +1,15 @@
 package tracker
 
 import (
-	"errors"
 	"fmt"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/rcrowley/go-metrics"
 	"github.com/remerge/cue"
 )
-
-var ErrSendClosedTracker = errors.New("attempt to send a message via closed tracker")
 
 // KafkaTrackerConfig is init configuration for KafkaTracker
 type KafkaTrackerConfig struct {
@@ -32,7 +31,6 @@ type KafkaTracker struct {
 		fast sarama.AsyncProducer
 		safe sarama.SyncProducer
 	}
-	closed bool
 }
 
 var _ Tracker = (*KafkaTracker)(nil)
@@ -127,19 +125,47 @@ func NewKafkaTrackerConfig(trackerConfig KafkaTrackerConfig) (t *KafkaTracker,
 	return t, nil
 }
 
-// Close the tracker.
-func (t *KafkaTracker) Close() {
-	if !t.closed {
-		t.closed = true
+// producerErrorSummary returns summary over occured errors
+func producerErrorSummary(errs sarama.ProducerErrors) error {
+	var es sync.Map
+
+	for _, pe := range errs {
+		if value, loaded := es.LoadOrStore(pe.Err, 1); loaded {
+			es.Store(pe.Err, (value.(int))+1)
+		}
 	}
 
+	var errStrs []string
+
+	es.Range(func(key, value interface{}) bool {
+		errStrs = append(errStrs, fmt.Sprintf("%v: %d", key, value))
+		return true
+	})
+
+	return fmt.Errorf(strings.Join(errStrs, "\n"))
+}
+
+// HandleProducerClosing handles producer closing errors
+func handleProducerClosing(errs error, handleMsg string) {
+	if errs != nil {
+		if errsProd, ok := errs.(sarama.ProducerErrors); ok {
+			_ = log.Error(producerErrorSummary(errsProd), handleMsg)
+		} else {
+			log.Warn("failed to cast error to sarama.ProducerErrors")
+			_ = log.Error(errs, handleMsg)
+		}
+	}
+}
+
+// Close the tracker.
+func (t *KafkaTracker) Close() {
 	// shutdown safe producer
 	log.Info("closing safe producer")
-	_ = log.Error(t.kafka.safe.Close(), "failed to close safe producer")
+	handleProducerClosing(t.kafka.safe.Close(), "failed to close safe producer")
 
 	// shutdwn fast producer
 	log.Info("closing fast producer")
-	_ = log.Error(t.kafka.fast.Close(), "failed to close fast producer")
+	handleProducerClosing(t.kafka.fast.Close(), "failed to close fast producer")
 }
 
 // FastMessage sends a message without waiting for confirmation.
@@ -149,10 +175,6 @@ func (t *KafkaTracker) FastMessage(topic string, value interface{}) error {
 
 // FastMessageWithKey sends a message without waiting for confirmation.
 func (t *KafkaTracker) FastMessageWithKey(topic string, value interface{}, key []byte) error {
-	if t.closed {
-		return ErrSendClosedTracker
-	}
-
 	message, err := t.generateMessage(topic, "fast", value, key)
 	if err != nil {
 		return err
@@ -170,10 +192,6 @@ func (t *KafkaTracker) SafeMessage(topic string, value interface{}) error {
 
 // SafeMessageWithKey sends a message and waits for confirmation.
 func (t *KafkaTracker) SafeMessageWithKey(topic string, value interface{}, key []byte) error {
-	if t.closed {
-		return ErrSendClosedTracker
-	}
-
 	message, err := t.generateMessage(topic, "safe", value, key)
 	if err != nil {
 		return err
