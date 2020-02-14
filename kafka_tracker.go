@@ -125,7 +125,7 @@ func NewKafkaTrackerConfig(trackerConfig KafkaTrackerConfig) (t *KafkaTracker,
 	return t, nil
 }
 
-// producerErrorSummary returns summary over occured errors
+// producerErrorSummary returns summary over occurred errors
 func producerErrorSummary(errs sarama.ProducerErrors) error {
 	var es sync.Map
 
