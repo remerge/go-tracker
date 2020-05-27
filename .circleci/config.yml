@@ -1,0 +1,72 @@
+version: 2.1
+
+orbs:
+  aws-s3: circleci/aws-s3@1.0.0
+
+executors:
+  go:
+    docker:
+      - image: 855600992954.dkr.ecr.eu-central-1.amazonaws.com/remerge/circleci:go-1.13.0
+        aws_auth:
+          aws_access_key_id: $DOCKER_KEY
+          aws_secret_access_key: $DOCKER_SECRET
+      - image: wurstmeister/zookeeper
+      - image: wurstmeister/kafka:2.12-2.2.1
+        environment:
+          KAFKA_ADVERTISED_HOST_NAME: localhost
+          KAFKA_ADVERTISED_PORT: 9092
+          KAFKA_PORT: 9092
+          KAFKA_ZOOKEEPER_CONNECT: localhost:2181
+          KAFKA_DELETE_TOPIC_ENABLE: true
+
+jobs:
+  test-build:
+    parameters:
+      build_and_upload:
+        type: boolean
+        default: false
+    executor: go
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "fe:e1:f3:39:6d:e1:71:31:eb:f8:58:c5:f3:71:de:b3"
+      - checkout
+      - run:
+          name: Setup Git
+          command: ../setup-git.sh
+      - restore_cache:
+          keys:
+            - modules-v1-{{ checksum "go.mod" }}
+            - modules-v1-
+      - run:
+          name: Lint
+          command: make lint
+      - run:
+          name: Test
+          command: make test-nocache
+      - run:
+          name: Test with race detector
+          command: make race-nocache
+      - when:
+          condition: << parameters.build_and_upload >>
+          steps:
+            - run:
+                name: Build
+                command: make dist
+            - aws-s3/copy:
+                from: ".build/"
+                to: "s3://remerge-artifacts/remerge/${CIRCLE_PROJECT_REPONAME}/${CIRCLE_BRANCH}/"
+                arguments: "--recursive"
+      - save_cache:
+          key: modules-v1-{{ checksum "go.mod" }}
+          paths:
+            - /go/pkg/mod
+            - /home/circleci/.cache/go-build
+
+workflows:
+  version: 2
+  "Go library":
+    jobs:
+      - test-build:
+          context: go-default
+          build_and_upload: false

@@ -53,7 +53,7 @@ func (t *BaseTracker) Encode(message interface{}) ([]byte, error) {
 		return json.Marshal(m)
 	}
 	if v, ok := message.(Timestampable); ok {
-		v.SetTimestampFrom(timestr.Now(), timestr.ISO8601())
+		v.SetTimestampFrom(timestr.NowUTC(), timestr.ISO8601inUTC())
 	}
 	if v, ok := message.(MetadatableSimple); ok {
 		v.SetMetadata(t.Metadata.Service, t.Metadata.Environment, t.Metadata.Cluster,
