@@ -172,7 +172,11 @@ func (t *KafkaTracker) SafeMessageWithKey(topic string, value interface{}, key [
 }
 
 func (t *KafkaTracker) generateMessage(topic string, typ string, value interface{}, key []byte) (*sarama.ProducerMessage, error) {
-	valueBuf, err := t.Encode(value)
+	message := sarama.ProducerMessage{
+		Topic: topic,
+	}
+
+	encodedValue, err := t.Encode(value)
 	if err != nil {
 		return nil, err
 	}
@@ -180,14 +184,13 @@ func (t *KafkaTracker) generateMessage(topic string, typ string, value interface
 	if log.EnabledFor(cue.DEBUG) {
 		log.WithFields(cue.Fields{
 			"topic": topic,
-			"value": string(valueBuf),
+			"value": string(encodedValue),
 			"key":   key,
 		}).Debugf("sending %s message", typ)
 	}
 
-	message := sarama.ProducerMessage{
-		Topic: topic,
-		Value: sarama.ByteEncoder(valueBuf),
+	if encodedValue != nil {
+		message.Value = sarama.ByteEncoder(encodedValue)
 	}
 	if key != nil {
 		message.Key = sarama.ByteEncoder(key)
