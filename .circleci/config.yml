@@ -19,15 +19,17 @@ jobs:
         default: false
     executor: go
     steps:
+      # TODO: step only required you require access to private repositories
       - add_ssh_keys:
           fingerprints:
             # TODO: exchange with fingerprint of added SSH key that has access to GitHub
             - "f7:b4:dd:16:39:97:49:de:90:85:ab:37:fd:92:77:44"
       - checkout
+      # TODO: step only required you require access to private repositories
       - run:
           name: Setup Git
           command: ../setup-git.sh
-      # if you need specific setup steps for the projects, put them here:
+      # TODO: if you need specific setup steps for the projects, put them here:
       # - run:
       #     name: Setup service specific dependencies
       #     command: .circleci/setup.sh
@@ -62,7 +64,7 @@ jobs:
 
 workflows:
   version: 2
-  # DELETE either the "Go app" or "Go library" workflow
+  # TODO: delete either the "Go app" or "Go library" workflow
   "Go app":
     jobs:
       - test-build:

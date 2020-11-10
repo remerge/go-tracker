@@ -20,7 +20,7 @@ MAIN ?= main
 # NOTE: logically pull out binaries from source tree
 .build/$(PROJECT).%: $(GO_SOURCES) go.mod
 	mkdir -p $(@D)
-	CGO_ENABLED=0 GOOS=$(basename $*) GOARCH=$(patsubst .%,%,$(suffix $*)) go build -o $@ -ldflags "$(LDFLAGS)" $(PACKAGE)/$(MAIN)
+	CGO_ENABLED=0 GOOS=$(basename $*) GOARCH=$(patsubst .%,%,$(suffix $*)) go build -trimpath -o $@ -ldflags "$(LDFLAGS)" $(PACKAGE)/$(MAIN)
 
 dist: .build/$(PROJECT).linux.amd64	## linux amd64 binary
 
