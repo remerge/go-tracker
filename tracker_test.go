@@ -10,7 +10,7 @@ import (
 
 type GE struct {
 	given    interface{}
-	expected string
+	expected []byte
 }
 
 type testEvent struct {
@@ -55,19 +55,45 @@ func TestBaseTrackerEncoding(t *testing.T) {
 		Release:     "Release",
 	}}
 
-	for _, e := range []GE{
-		{[]byte{1, 2, 3, 4}, string([]byte{1, 2, 3, 4})},
-		{"1234", "1234"},
-		{map[string]interface{}{"hallo": "test"}, `{"hallo":"test","ts":"1982-04-03T12:00:00Z"}`},
-		{&testEvent{}, `{"Service":"Service","Environment":"Environment","Cluster":"Cluster","Host":"Host","Release":"Release"}`},
-		{&testEventSimple{}, `{"Service":"Service","Environment":"Environment","Cluster":"Cluster","Host":"Host","Release":"Release"}`},
-		{&customJSONEvent{}, "test"},
-		{&timestampableEvent{}, `{"Now":"1982-04-03T12:00:00Z"}`},
-		{nil, ""},
-	} {
+	tests := []GE{
+		{
+			[]byte{1, 2, 3, 4},
+			[]byte{1, 2, 3, 4},
+		},
+		{
+			"1234",
+			[]byte("1234"),
+		},
+		{
+			map[string]interface{}{"hallo": "test"},
+			[]byte(`{"hallo":"test","ts":"1982-04-03T12:00:00Z"}`),
+		},
+		{
+			&testEvent{},
+			[]byte(`{"Service":"Service","Environment":"Environment","Cluster":"Cluster","Host":"Host","Release":"Release"}`),
+		},
+		{
+			&testEventSimple{},
+			[]byte(`{"Service":"Service","Environment":"Environment","Cluster":"Cluster","Host":"Host","Release":"Release"}`),
+		},
+		{
+			&customJSONEvent{},
+			[]byte("test"),
+		},
+		{
+			&timestampableEvent{},
+			[]byte(`{"Now":"1982-04-03T12:00:00Z"}`),
+		},
+		{
+			nil,
+			nil,
+		},
+	}
+
+	for _, e := range tests {
 		actual, err := tracker.Encode(e.given)
 		assert.NoError(t, err)
-		assert.Equal(t, []byte(e.expected), actual)
+		assert.Equal(t, e.expected, actual)
 	}
 
 }
