@@ -6,7 +6,7 @@ orbs:
 executors:
   go:
     docker:
-      - image: 855600992954.dkr.ecr.eu-central-1.amazonaws.com/remerge/circleci:go-1.13.0
+      - image: 855600992954.dkr.ecr.eu-central-1.amazonaws.com/remerge/circleci:go-1.14.2
         aws_auth:
           aws_access_key_id: $DOCKER_KEY
           aws_secret_access_key: $DOCKER_SECRET
